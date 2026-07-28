@@ -1,7 +1,7 @@
 """
 MCP Server for Maintenance Ticket Management
 Provides tools for creating, reading, updating, and deleting maintenance tickets
-via the Model Context Protocol
+via the Model Context Protocol. Includes RAG pipeline for finding similar tickets.
 """
 
 import json
@@ -11,6 +11,14 @@ from datetime import datetime
 from typing import Any, Optional, List, Dict
 
 logger = logging.getLogger(__name__)
+
+# Import RAG pipeline
+try:
+    from src.rag_pipeline import find_similar_tickets, refresh_rag_pipeline
+    RAG_AVAILABLE = True
+except ImportError:
+    RAG_AVAILABLE = False
+    logger.warning("RAG pipeline not available")
 
 # Data file for tickets
 TICKETS_FILE = Path("data/maintenance_tickets.json")
@@ -31,15 +39,34 @@ def load_tickets() -> List[Dict[str, Any]]:
 
 
 def save_tickets(tickets: List[Dict[str, Any]]) -> None:
-    """Save maintenance tickets to file."""
+    """Save maintenance tickets to file and refresh RAG pipeline."""
     try:
         TICKETS_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(TICKETS_FILE, "w", encoding="utf-8") as f:
             json.dump(tickets, f, indent=2, ensure_ascii=False)
         logger.info(f"Saved {len(tickets)} tickets")
+
+        # Refresh RAG pipeline when tickets change
+        if RAG_AVAILABLE:
+            refresh_rag_pipeline()
     except Exception as e:
         logger.error(f"Error saving tickets: {str(e)}")
         raise
+
+
+def get_similar_tickets(query: str, k: int = 3) -> List[Dict[str, Any]]:
+    """Find similar past tickets using RAG pipeline."""
+    if not RAG_AVAILABLE:
+        logger.warning("RAG pipeline not available")
+        return []
+
+    try:
+        similar = find_similar_tickets(query, k=k)
+        logger.info(f"Found {len(similar)} similar tickets for query: {query[:50]}...")
+        return similar
+    except Exception as e:
+        logger.error(f"Error finding similar tickets: {e}")
+        return []
 
 
 def create_ticket(
@@ -90,8 +117,14 @@ def create_ticket(
     tickets.append(ticket)
     save_tickets(tickets)
 
+    # Find similar past tickets using RAG
+    similar_tickets = get_similar_tickets(description, k=3)
+
     logger.info(f"Created ticket {ticket['ticket_id']} for {machine_id}")
-    return ticket
+    return {
+        **ticket,
+        "similar_tickets": similar_tickets
+    }
 
 
 def get_ticket(ticket_id: str) -> Optional[Dict[str, Any]]:
