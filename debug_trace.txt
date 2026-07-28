@@ -1,0 +1,217 @@
+[12:10:58.253] [UI] Creating agent for role: operator
+[12:10:58.254] [UI] User input: test
+[12:10:58.422] [UI] Agent created successfully
+[12:10:59.101] [UI] Agent result received: <class 'dict'>
+[12:10:59.103] [UI] Result success: True
+[12:10:59.104] [UI] Response type: <class 'str'>
+[12:10:59.104] [UI] Response length: 47
+[12:10:59.105] [UI] Extracted response: System operational. How can I assist you today?
+[12:10:59.106] [UI] Tool calls: 0
+[12:10:59.107] [UI] About to display tool calls...
+[12:24:45.727] [UI] Creating agent for role: operator
+[12:24:45.728] [UI] User input: What is machine MX-204
+[12:24:45.870] [UI] Agent created successfully
+[12:24:45.875] [UI] Agent result received: <class 'dict'>
+[12:24:45.877] [UI] Result success: False
+[12:24:45.878] [UI] Response type: <class 'str'>
+[12:24:45.879] [UI] Response length: 55
+[12:24:45.881] [UI] Extracted response: Error: 'SystemMessage' object has no attribute 'invoke'
+[12:24:45.882] [UI] Tool calls: 0
+[12:24:45.883] [UI] About to display tool calls...
+[12:26:59.263] [UI] Creating agent for role: operator
+[12:26:59.265] [UI] User input: what is working
+[12:26:59.429] [UI] Agent created successfully
+[12:27:01.362] [UI] Agent result received: <class 'dict'>
+[12:27:01.364] [UI] Result success: True
+[12:27:01.366] [UI] Response type: <class 'str'>
+[12:27:01.368] [UI] Response length: 452
+[12:27:01.370] [UI] Extracted response: It looks like the machines I checked are currently operational:
+
+*   **CNC Milling Machine A (MX-201
+[12:27:01.372] [UI] Tool calls: 2
+[12:27:01.374] [UI] About to display tool calls...
+[12:27:57.594] [UI] Creating agent for role: operator
+[12:27:57.596] [UI] User input: Can you give me manager data
+[12:27:57.648] [UI] Agent created successfully
+[12:27:58.729] [UI] Agent result received: <class 'dict'>
+[12:27:58.730] [UI] Result success: True
+[12:27:58.731] [UI] Response type: <class 'str'>
+[12:27:58.733] [UI] Response length: 589
+[12:27:58.735] [UI] Extracted response: I apologize, but I do not have access to manager or personnel contact information. My capabilities a
+[12:27:58.736] [UI] Tool calls: 0
+[12:27:58.737] [UI] About to display tool calls...
+[12:29:40.422] [UI] Creating agent for role: operator
+[12:29:40.424] [UI] User input: test
+[12:29:40.425] [UI] Creating NEW agent for role: operator
+[12:29:40.583] [UI] Agent ready successfully
+[12:29:41.482] [UI] Agent result received: <class 'dict'>
+[12:29:41.483] [UI] Result success: True
+[12:29:41.485] [UI] Response type: <class 'str'>
+[12:29:41.486] [UI] Response length: 285
+[12:29:41.487] [UI] Extracted response: Hello! I am your Manufacturing Assistant. I'm here to help you with machine status checks, error cod
+[12:29:41.489] [UI] Tool calls: 0
+[12:29:41.490] [UI] About to display tool calls...
+[12:32:00.285] [UI] Creating agent for role: operator
+[12:32:00.289] [UI] User input: Hey
+[12:32:00.290] [UI] Creating NEW agent for role: operator
+[12:32:00.463] [UI] Agent ready successfully
+[12:32:01.279] [UI] Agent result received: <class 'dict'>
+[12:32:01.280] [UI] Result success: True
+[12:32:01.282] [UI] Response type: <class 'str'>
+[12:32:01.283] [UI] Response length: 145
+[12:32:01.284] [UI] Extracted response: Hello! How can I help you on the floor today? Are you experiencing any issues with a machine, or do 
+[12:32:01.286] [UI] Tool calls: 0
+[12:32:01.287] [UI] About to display tool calls...
+[12:32:01.291] [SAVE] Chat history saved for Operator (2 messages)
+[12:32:01.292] [AUTO-SAVE] Chat history auto-saved for Operator
+[12:32:09.666] [SAVE] Chat history saved for Operator (2 messages)
+[12:32:11.149] [SAVE] Chat history saved for Engineer (0 messages)
+[12:32:11.151] [LOAD] Chat history loaded for Operator (2 messages)
+[12:34:11.728] [LOAD] Chat history loaded for Operator (2 messages)
+[12:34:25.744] [SAVE] Chat history saved for Operator (2 messages)
+[12:34:25.747] [LOAD] Chat history loaded for Engineer (0 messages)
+[12:34:31.562] [UI] Creating agent for role: engineer
+[12:34:31.564] [UI] User input: test
+[12:34:31.565] [UI] Creating NEW agent for role: engineer
+[12:34:31.736] [UI] Agent ready successfully
+[12:34:32.718] [UI] Agent result received: <class 'dict'>
+[12:34:32.719] [UI] Result success: True
+[12:34:32.721] [UI] Response type: <class 'str'>
+[12:34:32.723] [UI] Response length: 336
+[12:34:32.724] [UI] Extracted response: Hello! It seems you are testing the system. I am your Manufacturing Assistant, ready to help you wit
+[12:34:32.726] [UI] Tool calls: 0
+[12:34:32.728] [UI] About to display tool calls...
+[12:34:32.731] [SAVE] Chat history saved for Engineer (2 messages)
+[12:34:32.732] [AUTO-SAVE] Chat history auto-saved for Engineer
+[12:42:32.961] [LOAD] Chat history loaded for Operator (2 messages)
+[12:42:38.496] [LOAD] Chat history loaded for Operator (2 messages)
+[12:43:21.201] [LOAD] Chat history loaded for Operator (2 messages)
+[12:44:29.911] [LOAD] Chat history loaded for Operator (2 messages)
+[12:45:46.716] [LOAD] Chat history loaded for Operator (2 messages)
+[12:45:54.345] [SAVE] Chat history saved for Operator (0 messages)
+[12:48:33.612] [SAVE] Chat saved: 5e83df34 (0 messages)
+[12:48:33.614] [NEW CHAT] Created: 5e83df34
+[12:48:40.180] [UI] Creating agent for role: operator
+[12:48:40.183] [UI] User input: Hey
+[12:48:40.185] [UI] Creating NEW agent for role: operator
+[12:48:40.362] [UI] Agent ready successfully
+[12:48:41.171] [UI] Agent result received: <class 'dict'>
+[12:48:41.173] [UI] Result success: True
+[12:48:41.175] [UI] Extracted response: Hello! How can I help you on the floor today? Are you experiencing any issues with a machine, or do 
+[12:48:41.178] [UI] Tool calls: 0
+[12:48:41.184] [SAVE] Chat saved: 5e83df34 (2 messages)
+[12:48:41.186] [AUTO-SAVE] Chat auto-saved
+[12:48:45.069] [SAVE] Chat saved: 540490ab (0 messages)
+[12:48:45.071] [NEW CHAT] Created: 540490ab
+[12:48:46.262] [LOAD] Chat loaded: 540490ab (0 messages)
+[12:48:46.759] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[12:48:47.333] [SAVE] Chat saved: 5e83df34 (2 messages)
+[12:48:47.336] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[12:48:47.969] [SAVE] Chat saved: 5e83df34 (2 messages)
+[12:48:47.971] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[12:48:48.832] [SAVE] Chat saved: 5e83df34 (2 messages)
+[12:48:48.834] [LOAD] Chat loaded: 540490ab (0 messages)
+[12:48:49.595] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[12:48:50.196] [SAVE] Chat saved: 5e83df34 (2 messages)
+[12:48:50.199] [LOAD] Chat loaded: 540490ab (0 messages)
+[13:31:26.961] [SAVE] Chat saved: 0c59eee7 (0 messages)
+[13:31:26.963] [NEW CHAT] Created: 0c59eee7
+[13:31:39.360] [UI] Creating agent for role: operator
+[13:31:39.362] [UI] User input: Please create maintance tikect
+[13:31:39.365] [UI] Creating NEW agent for role: operator
+[13:31:39.513] [UI] Agent ready successfully
+[13:31:40.580] [UI] Agent result received: <class 'dict'>
+[13:31:40.582] [UI] Result success: True
+[13:31:40.585] [UI] Extracted response: [{'type': 'text', 'text': "I can certainly help you with that. To get the maintenance ticket started, I need a few more details:\n\n1.  **Which machine ID** are you referring to? (e.g., MX-201)\n2.  **What is the issue?** Please describe what is happening.\n3.  **What is the priority?** (e.g., low, medium, high, or critical)\n\nOnce you provide that information, I will submit a request for supervisor approval. After it's approved, I'll create the official maintenance ticket for you.", 'extras': {'signature': 'EjQKMgERTTIPfbIoMMstlAD1HE6zYJo0Ifb39sScNwc1qmVAFmIg9KvV79GWyhp7HwhXuO8B'}}]
+[13:31:40.588] [UI] Tool calls: 0
+[13:31:40.590] [UI] EXCEPTION CAUGHT: AttributeError
+[13:31:40.593] [UI] Error message: 'list' object has no attribute 'strip'
+[13:33:02.406] [LOAD] Chat loaded: 0c59eee7 (0 messages)
+[13:33:06.471] [UI] Creating agent for role: operator
+[13:33:06.473] [UI] User input: hey
+[13:33:06.476] [UI] Creating NEW agent for role: operator
+[13:33:06.532] [UI] Agent ready successfully
+[13:33:07.307] [UI] Agent result received: <class 'dict'>
+[13:33:07.310] [UI] Result success: True
+[13:33:07.313] [UI] Extracted response: [{'type': 'text', 'text': 'Hello! How can I help you on the floor today? Are you checking on a specific machine, or is there something else I can assist you with?', 'extras': {'signature': 'EjQKMgERTTIPX1LwOYc5obua1Pvp0lKQdZ/kD+x3a8VtxzUfQXWNStE3iyf/Jpjq7YGyI2jP'}}]
+[13:33:07.315] [UI] Tool calls: 0
+[13:33:07.318] [UI] EXCEPTION CAUGHT: AttributeError
+[13:33:07.320] [UI] Error message: 'list' object has no attribute 'strip'
+[13:33:07.324] [UI] Traceback:
+Traceback (most recent call last):
+  File "C:\StreamLit\pages\1_💬_Chat.py", line 480, in <module>
+    if not response_text or len(response_text.strip()) == 0:
+                                ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'strip'
+
+[13:54:27.446] [SAVE] Chat saved: 5154492e (0 messages)
+[13:54:27.448] [NEW CHAT] Created: 5154492e
+[13:54:34.101] [UI] Creating agent for role: engineer
+[13:54:34.103] [UI] User input: "Create a ticket for MX-204, coolant pump broken, high priority"
+[13:54:34.105] [UI] Creating NEW agent for role: engineer
+[13:54:34.252] [UI] Agent ready successfully
+[13:54:37.873] [UI] Agent result received: <class 'dict'>
+[13:54:37.875] [UI] Result success: True
+[13:54:37.877] [UI] Extracted response: I have initiated the process to create a maintenance ticket for the **MX-204 (Hydraulic Press B)**.
+
+[13:54:37.878] [UI] Tool calls: 3
+[13:54:37.885] [SAVE] Chat saved: 5154492e (2 messages)
+[13:54:37.887] [AUTO-SAVE] Chat auto-saved
+[13:54:37.991] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:54:44.361] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:54:44.372] [APPROVAL] User approved action - Processing with agent...
+[13:54:44.375] [APPROVAL] Sending '✅ Approved' to agent
+[13:54:46.219] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:54:46.231] [APPROVAL] User approved action - Processing with agent...
+[13:54:46.233] [APPROVAL] Sending '✅ Approved' to agent
+[13:54:46.376] [APPROVAL] Agent response: The maintenance ticket has been successfully created.
+
+**Ticket Details:**
+*   **Ticket ID:** TKT-20
+[13:54:48.398] [APPROVAL] Agent response: The maintenance ticket for the **MX-204 (Hydraulic Press B)** has been successfully created.
+
+### Ti
+[13:54:48.403] [SAVE] Chat saved: 5154492e (5 messages)
+[13:54:48.505] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:55:53.225] [SAVE] Chat saved: 5154492e (5 messages)
+[13:55:55.212] [SAVE] Chat saved: 09eb7b42 (0 messages)
+[13:55:55.214] [NEW CHAT] Created: 09eb7b42
+[13:56:04.788] [UI] Creating agent for role: plant_manager
+[13:56:04.791] [UI] User input: please tell about ticket TKT-20260728135447
+[13:56:04.792] [UI] Creating NEW agent for role: plant_manager
+[13:56:04.850] [UI] Agent ready successfully
+[13:56:07.262] [UI] Agent result received: <class 'dict'>
+[13:56:07.264] [UI] Result success: True
+[13:56:07.266] [UI] Extracted response: The maintenance ticket **TKT-20260728135447** is currently **open** and requires immediate attention
+[13:56:07.268] [UI] Tool calls: 1
+[13:56:07.273] [SAVE] Chat saved: 09eb7b42 (2 messages)
+[13:56:07.274] [AUTO-SAVE] Chat auto-saved
+[13:56:17.025] [SAVE] Chat saved: 09eb7b42 (2 messages)
+[13:56:17.143] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:56:21.022] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:56:21.027] [SAVE] Chat saved: 843c161a (0 messages)
+[13:56:21.030] [NEW CHAT] Created: 843c161a
+[13:56:21.128] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:56:26.484] [LOAD] Chat loaded: 0c59eee7 (0 messages)
+[13:56:28.604] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[13:56:29.748] [SAVE] Chat saved: 5e83df34 (2 messages)
+[13:56:29.752] [LOAD] Chat loaded: 540490ab (0 messages)
+[13:56:30.240] [LOAD] Chat loaded: 0c59eee7 (0 messages)
+[13:56:32.148] [LOAD] Chat loaded: 0c59eee7 (0 messages)
+[13:56:32.562] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[13:56:33.034] [SAVE] Chat saved: 5e83df34 (2 messages)
+[13:56:33.038] [LOAD] Chat loaded: 540490ab (0 messages)
+[13:56:33.364] [LOAD] Chat loaded: 0c59eee7 (0 messages)
+[13:56:33.666] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[13:56:35.449] [SAVE] Chat saved: 5e83df34 (2 messages)
+[13:56:36.348] [LOAD] Chat loaded: 09eb7b42 (2 messages)
+[13:56:39.625] [SAVE] Chat saved: 09eb7b42 (2 messages)
+[13:58:04.365] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[13:58:09.657] [SAVE] Chat saved: 5e83df34 (2 messages)
+[13:58:09.660] [LOAD] Chat loaded: 0c59eee7 (0 messages)
+[13:58:09.998] [LOAD] Chat loaded: 5e83df34 (2 messages)
+[13:58:11.255] [SAVE] Chat saved: 5e83df34 (2 messages)
+[13:58:11.353] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:58:12.973] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[13:58:12.982] [LOAD] Chat loaded: 843c161a (0 messages)
+[13:58:13.085] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>

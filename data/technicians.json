@@ -1,0 +1,37 @@
+[
+  {
+    "technician_id": "T001",
+    "name": "John Smith",
+    "specialties": ["electrical", "general"],
+    "status": "available",
+    "current_task": null
+  },
+  {
+    "technician_id": "T002",
+    "name": "Maria Garcia",
+    "specialties": ["hydraulic", "mechanical"],
+    "status": "available",
+    "current_task": null
+  },
+  {
+    "technician_id": "T003",
+    "name": "Robert Chen",
+    "specialties": ["mechanical", "general"],
+    "status": "busy",
+    "current_task": "MX-410 spindle maintenance"
+  },
+  {
+    "technician_id": "T004",
+    "name": "Sarah Johnson",
+    "specialties": ["electrical", "hydraulic"],
+    "status": "available",
+    "current_task": null
+  },
+  {
+    "technician_id": "T005",
+    "name": "Miguel Rodriguez",
+    "specialties": ["general"],
+    "status": "available",
+    "current_task": null
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "id": "5e83df34",
+  "name": "Chat - 2026-07-28 12:48",
+  "role": "Operator",
+  "created": "2026-07-28T13:58:11.253451",
+  "last_updated": "2026-07-28T13:58:11.253523",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hey"
+    },
+    {
+      "role": "agent",
+      "content": "Hello! How can I help you on the floor today? Are you experiencing any issues with a machine, or do you need information on a specific procedure?"
+    }
+  ]
+}

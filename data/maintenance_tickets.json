@@ -1,0 +1,60 @@
+[
+  {
+    "ticket_id": "TKT-2026-0728114805",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "description": "Error E17: Hydraulic pressure loss in main cylinder. Machine unable to generate full clamping force. Recommended action: Inspect hydraulic lines, check pump pressure, possible seal replacement.",
+    "priority": "high",
+    "created_at": "2026-07-28T11:48:05.564722Z",
+    "status": "open",
+    "assigned_technician": null,
+    "notes": []
+  },
+  {
+    "ticket_id": "TKT-2026-0728115131",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "description": "Error E17: Hydraulic pressure loss in main cylinder. Machine unable to generate full clamping force. Recommended action: Inspect hydraulic lines, check pump pressure, possible seal replacement.",
+    "priority": "high",
+    "created_at": "2026-07-28T11:51:31.649807Z",
+    "status": "open",
+    "assigned_technician": null,
+    "notes": []
+  },
+  {
+    "ticket_id": "TKT-20260728135120",
+    "machine_id": "MX-204",
+    "description": "Hydraulic pressure loss in main cylinder, error E17 reported. Machine unable to generate full clamping force.",
+    "priority": "high",
+    "status": "open",
+    "created_at": "2026-07-28T13:51:20.784557",
+    "updated_at": "2026-07-28T13:51:20.784563",
+    "assigned_to": null,
+    "notes": [],
+    "source": "mcp_approval"
+  },
+  {
+    "ticket_id": "TKT-20260728135445",
+    "machine_id": "MX-204",
+    "description": "Coolant pump broken. Reported by user.",
+    "priority": "high",
+    "status": "open",
+    "created_at": "2026-07-28T13:54:45.241340",
+    "updated_at": "2026-07-28T13:54:45.241349",
+    "assigned_to": null,
+    "notes": [],
+    "source": "mcp_approval"
+  },
+  {
+    "ticket_id": "TKT-20260728135447",
+    "machine_id": "MX-204",
+    "description": "Coolant pump broken - maintenance requested by user.",
+    "priority": "high",
+    "status": "open",
+    "created_at": "2026-07-28T13:54:47.066155",
+    "updated_at": "2026-07-28T13:54:47.066161",
+    "assigned_to": null,
+    "notes": [],
+    "source": "mcp_approval"
+  }
+]

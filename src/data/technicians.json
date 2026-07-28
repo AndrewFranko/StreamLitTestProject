@@ -1,0 +1,7 @@
+{
+  "technicians": [
+    {"id": "T001", "name": "John Smith", "specialty": "hydraulic", "status": "available", "current_tasks": 1},
+    {"id": "T002", "name": "Sarah Johnson", "specialty": "electrical", "status": "available", "current_tasks": 0},
+    {"id": "T003", "name": "Mike Davis", "specialty": "mechanical", "status": "busy", "current_tasks": 3}
+  ]
+}

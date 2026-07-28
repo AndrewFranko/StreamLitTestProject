@@ -1,0 +1,58 @@
+[
+  {
+    "id": "MX-201",
+    "name": "CNC Milling Machine A",
+    "type": "CNC Milling",
+    "location": "Plant 1 - Bay A",
+    "status": "operational",
+    "temperature": 72,
+    "runtime_hours": 12450,
+    "last_maintenance": "2026-07-15",
+    "maintenance_interval_days": 30
+  },
+  {
+    "id": "MX-204",
+    "name": "Hydraulic Press B",
+    "type": "Hydraulic Press",
+    "location": "Plant 1 - Bay B",
+    "status": "error",
+    "error_code": "E17",
+    "temperature": 85,
+    "runtime_hours": 8920,
+    "last_maintenance": "2026-06-20",
+    "maintenance_interval_days": 30
+  },
+  {
+    "id": "MX-312",
+    "name": "Assembly Line Conveyor",
+    "type": "Conveyor System",
+    "location": "Plant 2 - Assembly",
+    "status": "operational",
+    "temperature": 68,
+    "runtime_hours": 15680,
+    "last_maintenance": "2026-07-10",
+    "maintenance_interval_days": 14
+  },
+  {
+    "id": "WD-105",
+    "name": "Welding Station C",
+    "type": "Robotic Welder",
+    "location": "Plant 1 - Weld Shop",
+    "status": "operational",
+    "temperature": 95,
+    "runtime_hours": 22100,
+    "last_maintenance": "2026-07-01",
+    "maintenance_interval_days": 7
+  },
+  {
+    "id": "PK-089",
+    "name": "Packaging Machine",
+    "type": "Automated Packaging",
+    "location": "Plant 3 - Packaging",
+    "status": "idle",
+    "temperature": 70,
+    "runtime_hours": 5340,
+    "last_maintenance": "2026-07-18",
+    "maintenance_interval_days": 30
+  }
+]
