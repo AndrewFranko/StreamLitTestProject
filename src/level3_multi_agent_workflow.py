@@ -477,30 +477,30 @@ def execute_workflow(user_input: str, config: dict = None) -> dict:
         "error": ""
     }
 
-    # Try LangGraph execution
-    if LANGGRAPH_AVAILABLE:
-        try:
-            workflow = build_langgraph_workflow()
-            if workflow:
-                logger.info("[Workflow] Executing with LangGraph")
+    # LangGraph execution (required)
+    if not LANGGRAPH_AVAILABLE:
+        raise ImportError(
+            "LangGraph is required for Level 3 workflow. "
+            "Install: pip install langgraph"
+        )
 
-                if config is None:
-                    config = {"configurable": {"thread_id": f"fault_{datetime.now().timestamp()}"}}
+    try:
+        workflow = build_langgraph_workflow()
+        if not workflow:
+            raise RuntimeError("Failed to build LangGraph workflow")
 
-                result = workflow.invoke(initial_state, config=config)
-                logger.info("[Workflow] LangGraph execution completed")
-                return result
-        except Exception as e:
-            logger.warning(f"LangGraph execution failed, falling back to sequential: {e}")
+        logger.info("[Workflow] Executing with LangGraph")
 
-    # Fallback: Sequential execution
-    logger.info("[Workflow] Executing sequentially (no LangGraph)")
-    state = initial_state
-    state = fault_analysis_agent(state)
-    state = diagnosis_agent(state)
-    state = request_agent(state)
+        if config is None:
+            config = {"configurable": {"thread_id": f"fault_{datetime.now().timestamp()}"}}
 
-    return state
+        result = workflow.invoke(initial_state, config=config)
+        logger.info("[Workflow] LangGraph execution completed")
+        return result
+
+    except Exception as e:
+        logger.error(f"LangGraph execution failed: {e}")
+        raise
 
 
 # ============================================================================
