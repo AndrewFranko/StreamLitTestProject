@@ -34,6 +34,12 @@ Describe a machine fault and the system will:
 if "fault_workflows" not in st.session_state:
     st.session_state.fault_workflows = []
 
+if "pending_fault_approval" not in st.session_state:
+    st.session_state.pending_fault_approval = None
+
+if "approved_fault_result" not in st.session_state:
+    st.session_state.approved_fault_result = None
+
 # ============================================================================
 # SIDEBAR: Controls
 # ============================================================================
@@ -81,21 +87,50 @@ if run_button and user_input.strip():
     with st.spinner("Running fault handling workflow..."):
         result = execute_workflow(user_input)
 
-        # Store in history
-        st.session_state.fault_workflows.insert(0, {
-            "timestamp": datetime.now().isoformat(),
-            "input": user_input,
-            "result": result
-        })
+        # CHECK FOR CRITICAL SEVERITY - REQUIRE APPROVAL
+        severity = result.get("diagnosis", {}).get("severity", "unknown")
 
-        st.success("✅ Workflow Completed")
+        if severity == "critical":
+            # REQUIRE APPROVAL FOR CRITICAL FAULTS
+            st.session_state.pending_fault_approval = {
+                "input": user_input,
+                "result": result,
+                "timestamp": datetime.now().isoformat()
+            }
+            st.warning("⚠️ CRITICAL SEVERITY - Approval Required Before Creating Ticket")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✅ Approve & Create Ticket", use_container_width=True):
+                    # Store approved result
+                    st.session_state.fault_workflows.insert(0, st.session_state.pending_fault_approval)
+                    st.session_state.pending_fault_approval = None
+                    st.success("✅ Ticket Created Successfully")
+                    st.balloons()
+                    st.rerun()
+
+            with col2:
+                if st.button("❌ Reject - Don't Create", use_container_width=True):
+                    st.info("Action cancelled by user")
+                    st.session_state.pending_fault_approval = None
+                    st.rerun()
+        else:
+            # NON-CRITICAL: CREATE TICKET IMMEDIATELY
+            st.session_state.fault_workflows.insert(0, {
+                "timestamp": datetime.now().isoformat(),
+                "input": user_input,
+                "result": result
+            })
+
+            st.success("✅ Workflow Completed")
 
         # ====================================================================
-        # TAB 1: Workflow Summary
+        # TAB 1: Workflow Summary (only show if no pending approval)
         # ====================================================================
-        tab1, tab2, tab3, tab4 = st.tabs(
-            ["📋 Summary", "🔍 Fault Analysis", "🔧 Diagnosis", "🎫 Ticket"]
-        )
+        if not st.session_state.pending_fault_approval:
+            tab1, tab2, tab3, tab4 = st.tabs(
+                ["📋 Summary", "🔍 Fault Analysis", "🔧 Diagnosis", "🎫 Ticket"]
+            )
 
         with tab1:
             col1, col2, col3 = st.columns(3)
