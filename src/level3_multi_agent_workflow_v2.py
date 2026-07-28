@@ -29,12 +29,11 @@ except ImportError:
 # LangGraph imports
 try:
     from langgraph.graph import StateGraph, END
-    from langgraph.checkpoint.sqlite import SqliteSaver
     from langchain_core.messages import add_messages
     LANGGRAPH_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     LANGGRAPH_AVAILABLE = False
-    print("Note: langgraph not available. Install: pip install langgraph")
+    print(f"Note: langgraph not available: {e}")
 
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
@@ -358,20 +357,13 @@ def build_langgraph_workflow():
     # Set entry point
     workflow.set_entry_point("fault_analysis")
 
-    # Compile with checkpointer
+    # Compile workflow
     try:
-        checkpointer_path = os.path.join(
-            os.path.dirname(__file__),
-            '..', 'data', 'checkpoints', 'level3_workflow_v2.db'
-        )
-        os.makedirs(os.path.dirname(checkpointer_path), exist_ok=True)
-
-        checkpointer = SqliteSaver(checkpointer_path)
-        compiled_workflow = workflow.compile(checkpointer=checkpointer)
-        logger.info(f"✓ LangGraph workflow compiled (v2 - true multi-agent)")
-    except Exception as e:
-        logger.warning(f"Could not create checkpointer: {e}. Using workflow without persistence.")
         compiled_workflow = workflow.compile()
+        logger.info("[OK] LangGraph workflow compiled (v2 - true multi-agent)")
+    except Exception as e:
+        logger.error(f"Failed to compile workflow: {e}")
+        raise
 
     return compiled_workflow
 
