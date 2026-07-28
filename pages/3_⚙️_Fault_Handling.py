@@ -94,17 +94,21 @@ if run_button and user_input.strip():
             "timestamp": datetime.now().isoformat()
         }
 
-        # ====================================================================
-        # SHOW WORKFLOW DETAILS (for review before approval)
-        # ====================================================================
-        st.info("📋 REVIEW DETAILS BELOW - Then approve or reject ticket creation")
+# ============================================================================
+# SHOW WORKFLOW DETAILS (for review before approval)
+# ============================================================================
 
-        # ====================================================================
-        # TABS: Show workflow details for human review
-        # ====================================================================
-        tab1, tab2, tab3, tab4 = st.tabs(
-            ["📋 Summary", "🔍 Fault Analysis", "🔧 Diagnosis", "🎫 Ticket"]
-        )
+if st.session_state.pending_fault_approval and not st.session_state.approved_fault_result:
+    result = st.session_state.pending_fault_approval["result"]
+
+    st.info("📋 REVIEW DETAILS BELOW - Then approve or reject ticket creation")
+
+    # ====================================================================
+    # TABS: Show workflow details for human review
+    # ====================================================================
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📋 Summary", "🔍 Fault Analysis", "🔧 Diagnosis", "🎫 Ticket"]
+    )
 
         with tab1:
             col1, col2, col3 = st.columns(3)
@@ -311,58 +315,58 @@ if run_button and user_input.strip():
                 if result.get("error"):
                     st.write(f"Error: {result['error']}")
 
-        # ====================================================================
-        # APPROVAL BUTTONS: Show after details for human review
-        # ====================================================================
-        st.divider()
-        st.warning("⚠️ APPROVAL REQUIRED - Review details above and then approve or reject")
+    # ====================================================================
+    # APPROVAL BUTTONS: Show after details for human review
+    # ====================================================================
+    st.divider()
+    st.warning("⚠️ APPROVAL REQUIRED - Review details above and then approve or reject")
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✅ Approve & Create Ticket", use_container_width=True):
-                # NOW create the ticket since user approved
-                from level3_multi_agent_workflow import create_maintenance_ticket
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("✅ Approve & Create Ticket", use_container_width=True):
+            # NOW create the ticket since user approved
+            from level3_multi_agent_workflow import create_maintenance_ticket
 
-                approved_result = st.session_state.pending_fault_approval["result"]
-                fault_data = approved_result.get("fault_analysis", {})
-                diagnosis = approved_result.get("diagnosis", {})
+            approved_result = st.session_state.pending_fault_approval["result"]
+            fault_data = approved_result.get("fault_analysis", {})
+            diagnosis = approved_result.get("diagnosis", {})
 
-                machine_id = fault_data.get("machine_id", "UNKNOWN")
-                error_code = fault_data.get("error_code", "UNKNOWN")
-                severity = diagnosis.get("severity", "unknown")
-                recommended_action = diagnosis.get("recommended_action", "Contact supervisor")
+            machine_id = fault_data.get("machine_id", "UNKNOWN")
+            error_code = fault_data.get("error_code", "UNKNOWN")
+            severity = diagnosis.get("severity", "unknown")
+            recommended_action = diagnosis.get("recommended_action", "Contact supervisor")
 
-                # Create the ticket
-                ticket_result = create_maintenance_ticket(
-                    machine_id=machine_id,
-                    error_code=error_code,
-                    description=recommended_action,
-                    severity=severity
-                )
+            # Create the ticket
+            ticket_result = create_maintenance_ticket(
+                machine_id=machine_id,
+                error_code=error_code,
+                description=recommended_action,
+                severity=severity
+            )
 
-                if ticket_result["success"]:
-                    # Update result with ticket info
-                    approved_result["ticket_created"] = True
-                    approved_result["ticket_id"] = ticket_result["ticket_id"]
+            if ticket_result["success"]:
+                # Update result with ticket info
+                approved_result["ticket_created"] = True
+                approved_result["ticket_id"] = ticket_result["ticket_id"]
 
-                    # Store in session state for display
-                    st.session_state.approved_fault_result = {
-                        "result": approved_result,
-                        "ticket_result": ticket_result
-                    }
-                    # Store in history
-                    st.session_state.fault_workflows.insert(0, st.session_state.pending_fault_approval)
-                    st.session_state.pending_fault_approval = None
-
-                    st.rerun()
-                else:
-                    st.error(f"Failed to create ticket: {ticket_result.get('error', 'Unknown error')}")
-
-        with col2:
-            if st.button("❌ Reject - Don't Create", use_container_width=True):
-                st.info("Action cancelled by user")
+                # Store in session state for display
+                st.session_state.approved_fault_result = {
+                    "result": approved_result,
+                    "ticket_result": ticket_result
+                }
+                # Store in history
+                st.session_state.fault_workflows.insert(0, st.session_state.pending_fault_approval)
                 st.session_state.pending_fault_approval = None
+
                 st.rerun()
+            else:
+                st.error(f"Failed to create ticket: {ticket_result.get('error', 'Unknown error')}")
+
+    with col2:
+        if st.button("❌ Reject - Don't Create", use_container_width=True):
+            st.info("Action cancelled by user")
+            st.session_state.pending_fault_approval = None
+            st.rerun()
 
 # ============================================================================
 # SHOW SUCCESS PAGE IF TICKET WAS APPROVED
