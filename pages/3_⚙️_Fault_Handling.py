@@ -12,7 +12,7 @@ from datetime import datetime
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from level3_multi_agent_workflow import execute_workflow
+from level3_multi_agent_workflow_v2 import execute_workflow
 
 st.set_page_config(
     page_title="Fault Handling",
