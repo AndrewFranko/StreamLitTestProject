@@ -15,7 +15,7 @@ Three independent agents:
 
 import json
 import os
-from typing import Any, TypedDict, Annotated
+from typing import Any, TypedDict
 from datetime import datetime
 import sys
 import logging
@@ -29,7 +29,6 @@ except ImportError:
 # LangGraph imports
 try:
     from langgraph.graph import StateGraph, END
-    from langchain_core.messages import add_messages
     LANGGRAPH_AVAILABLE = True
 except ImportError as e:
     LANGGRAPH_AVAILABLE = False
@@ -48,7 +47,7 @@ logger = logging.getLogger(__name__)
 class WorkflowState(TypedDict):
     """Shared state for all agents in the workflow."""
     user_input: str
-    messages: Annotated[list, add_messages]  # Message history
+    messages: list  # Message history
 
     # Agent outputs
     fault_analysis: dict
