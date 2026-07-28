@@ -110,15 +110,18 @@ if run_button and user_input.strip():
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                st.metric(
-                    "Status",
-                    "✅ Success" if result["ticket_created"] else "❌ Failed"
-                )
+                # Show status: if ticket created, show success; if awaiting approval, show pending
+                if result["ticket_created"]:
+                    st.metric("Status", "✅ Created")
+                elif result.get("awaiting_approval"):
+                    st.metric("Status", "⏳ PENDING APPROVAL")
+                else:
+                    st.metric("Status", "❌ Failed")
 
             with col2:
                 st.metric(
                     "Ticket ID",
-                    result["ticket_id"] if result["ticket_created"] else "N/A"
+                    result["ticket_id"] if result["ticket_created"] else "Awaiting Approval"
                 )
 
             with col3:
@@ -129,7 +132,12 @@ if run_button and user_input.strip():
 
             # Final Response
             st.subheader("Final Response")
-            st.info(result["final_response"])
+            if result["ticket_created"]:
+                st.success(result["final_response"])
+            elif result.get("awaiting_approval"):
+                st.warning(result["final_response"])
+            else:
+                st.info(result["final_response"])
 
             # Error (if any)
             if result.get("error"):
@@ -224,9 +232,11 @@ if run_button and user_input.strip():
         # TAB 4: Ticket Details
         # ====================================================================
         with tab4:
-            st.subheader("Maintenance Ticket Created")
+            st.subheader("Maintenance Ticket Details")
 
             if result["ticket_created"]:
+                st.success("✅ Ticket Successfully Created!")
+
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric("Ticket ID", result["ticket_id"])
@@ -267,6 +277,34 @@ if run_button and user_input.strip():
                     st.write(f"**Latest ticket ID**: {tickets[-1].get('ticket_id', 'N/A')}")
                 else:
                     st.error("Tickets file not found")
+
+            elif result.get("awaiting_approval"):
+                st.warning("⏳ Ticket Awaiting Human Approval")
+                st.info("""
+                **Ticket will be created with the following details:**
+
+                Once you approve using the buttons below, this ticket will be:
+                1. Created in the maintenance system
+                2. Assigned to available technicians
+                3. Tracked for completion
+                """)
+
+                # Preview of what will be created
+                fault = result["fault_analysis"]
+                diagnosis = result["diagnosis"]
+
+                st.divider()
+                st.subheader("Preview (if approved)")
+                preview_data = {
+                    "ticket_id": f"TICK-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                    "machine_id": fault.get("machine_id"),
+                    "error_code": fault.get("error_code"),
+                    "severity": diagnosis.get("severity"),
+                    "description": diagnosis.get("recommended_action"),
+                    "status": "will be OPEN",
+                    "assigned_technician": "will be assigned"
+                }
+                st.json(preview_data, expanded=False)
 
             else:
                 st.error("❌ Ticket creation failed")
