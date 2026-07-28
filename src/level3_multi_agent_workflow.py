@@ -363,8 +363,8 @@ def create_maintenance_ticket(machine_id: str, error_code: str, description: str
 
 def request_agent(state: WorkflowState) -> WorkflowState:
     """
-    Agent 3: Presents recommendation and WAITS FOR APPROVAL before creating ticket
-    For critical severity, requires human approval before ticket creation
+    Agent 3: Presents recommendation and ALWAYS WAITS FOR APPROVAL before creating ticket
+    ALL tickets require human approval before creation
     """
     diagnosis = state.get("diagnosis", {})
     fault_data = state.get("fault_analysis", {})
@@ -375,65 +375,23 @@ def request_agent(state: WorkflowState) -> WorkflowState:
     recommended_action = diagnosis.get("recommended_action", "Contact supervisor")
 
     logger.info(f"[Request] Preparing ticket for {machine_id}/{error_code} (Severity: {severity})")
+    logger.warning(f"[Request] AWAITING USER APPROVAL before creating ticket")
 
-    # IMPORTANT: For CRITICAL severity, DON'T create ticket yet
-    # Let the UI ask for approval first
-    if severity == "critical":
-        logger.warning(f"[Request] CRITICAL SEVERITY - Awaiting user approval before creating ticket")
-        state["awaiting_approval"] = True
-        state["ticket_created"] = False
-        state["ticket_id"] = ""
-        state["final_response"] = f"""
-CRITICAL SEVERITY DETECTED
+    # ALWAYS wait for approval - don't create ticket automatically
+    state["awaiting_approval"] = True
+    state["ticket_created"] = False
+    state["ticket_id"] = ""
+    state["final_response"] = f"""
+Maintenance Request Ready for Approval
 ========================================
 Machine: {machine_id}
 Error Code: {error_code}
 Severity: {severity.upper()}
 Recommended Action: {recommended_action}
 
-⚠️ THIS IS A CRITICAL FAULT
-User approval is required before creating ticket.
-        """
-        return state
-
-    # For non-critical, create ticket immediately
-    logger.info(f"[Request] Non-critical severity - Creating ticket immediately")
-
-    try:
-        # Create ticket using tool
-        ticket_result = create_maintenance_ticket(
-            machine_id=machine_id,
-            error_code=error_code,
-            description=recommended_action,
-            severity=severity
-        )
-
-        if ticket_result["success"]:
-            state["ticket_created"] = True
-            state["ticket_id"] = ticket_result["ticket_id"]
-            state["awaiting_approval"] = False
-            state["final_response"] = f"""
-Maintenance Request Created Successfully
-========================================
-Ticket ID: {ticket_result['ticket_id']}
-Machine: {machine_id}
-Error Code: {error_code}
-Severity: {severity}
-Recommended Action: {recommended_action}
-Status: Open
-            """
-        else:
-            state["ticket_created"] = False
-            state["awaiting_approval"] = False
-            state["error"] = ticket_result.get("error", "Unknown error")
-            state["final_response"] = f"Failed to create ticket: {state['error']}"
-
-    except Exception as e:
-        logger.error(f"[Request] Error: {e}")
-        state["error"] = str(e)
-        state["final_response"] = f"Error creating ticket: {str(e)}"
-        state["ticket_created"] = False
-        state["awaiting_approval"] = False
+⚠️ APPROVAL REQUIRED
+Please review and approve ticket creation before proceeding.
+    """
 
     return state
 
