@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from langchain_core.tools import tool
-from pydantic import Field, validator
+from pydantic import BaseModel, Field, validator
+from enum import Enum
 
 # Import MCP ticket server
 from src.mcp_ticket_server import (
@@ -29,6 +30,126 @@ from src.mcp_ticket_server import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# Guardrails: Priority Enum & Input Validation Models
+# ============================================================================
+
+class PriorityLevel(str, Enum):
+    """Ticket priority levels - guardrail enumeration."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class MachineStatusInput(BaseModel):
+    """Validated input for check_machine_status tool."""
+    machine_id: str = Field(
+        ...,
+        description="Machine ID (e.g., MX-204)",
+        min_length=4,
+        max_length=10,
+        pattern=r"^[A-Z]{2,3}-\d{3}$"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"machine_id": "MX-204"}
+        }
+
+
+class ErrorCodeInput(BaseModel):
+    """Validated input for lookup_error_code tool."""
+    error_code: str = Field(
+        ...,
+        description="Error code (e.g., E17)",
+        min_length=2,
+        max_length=5,
+        pattern=r"^[A-Z]\d{1,3}$"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"error_code": "E17"}
+        }
+
+
+class ApprovalInput(BaseModel):
+    """Validated input for request_approval tool."""
+    machine_id: str = Field(
+        ...,
+        description="Machine ID",
+        min_length=4,
+        max_length=10,
+        pattern=r"^[A-Z]{2,3}-\d{3}$"
+    )
+    description: str = Field(
+        ...,
+        description="Ticket description",
+        min_length=10,
+        max_length=500
+    )
+    priority: PriorityLevel = Field(
+        ...,
+        description="Ticket priority level"
+    )
+
+    @validator('description')
+    def validate_description(cls, v):
+        if not v or v.isspace():
+            raise ValueError("Description cannot be empty or whitespace")
+        if len(v) < 10:
+            raise ValueError("Description must be at least 10 characters")
+        return v.strip()
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "machine_id": "MX-204",
+                "description": "Hydraulic pressure loss detected, error E17",
+                "priority": "high"
+            }
+        }
+
+
+class TicketInput(BaseModel):
+    """Validated input for create_maintenance_ticket tool."""
+    machine_id: str = Field(
+        ...,
+        description="Machine ID",
+        min_length=4,
+        max_length=10,
+        pattern=r"^[A-Z]{2,3}-\d{3}$"
+    )
+    description: str = Field(
+        ...,
+        description="Ticket description",
+        min_length=10,
+        max_length=500
+    )
+    priority: PriorityLevel = Field(
+        ...,
+        description="Ticket priority level"
+    )
+
+    @validator('description')
+    def validate_description(cls, v):
+        if not v or v.isspace():
+            raise ValueError("Description cannot be empty or whitespace")
+        if len(v) < 10:
+            raise ValueError("Description must be at least 10 characters")
+        return v.strip()
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "machine_id": "MX-204",
+                "description": "Hydraulic pressure loss detected, error E17",
+                "priority": "high"
+            }
+        }
 
 
 # ============================================================================
@@ -217,7 +338,7 @@ def validate_specialty(specialty: str) -> bool:
 # Tool: check_machine_status
 # ============================================================================
 
-@tool
+@tool(args_schema=MachineStatusInput)
 def check_machine_status(machine_id: str) -> Dict[str, Any]:
     """
     Check the current operational status of a machine.
@@ -255,8 +376,9 @@ def check_machine_status(machine_id: str) -> Dict[str, Any]:
         }
     """
     try:
-        # Validate machine ID
-        validate_machine_id(machine_id)
+        # Input validation via Pydantic guardrail (args_schema)
+        validated = MachineStatusInput(machine_id=machine_id)
+        machine_id = validated.machine_id
 
         # Load machine data
         machines = load_json_data("data/machines.json")
@@ -282,7 +404,7 @@ def check_machine_status(machine_id: str) -> Dict[str, Any]:
 # Tool: lookup_error_code
 # ============================================================================
 
-@tool
+@tool(args_schema=ErrorCodeInput)
 def lookup_error_code(error_code: str) -> Dict[str, Any]:
     """
     Look up detailed information about a machine error code.
@@ -342,7 +464,7 @@ def lookup_error_code(error_code: str) -> Dict[str, Any]:
 # Tool: create_maintenance_ticket
 # ============================================================================
 
-@tool
+@tool(args_schema=TicketInput)
 def create_maintenance_ticket(
     machine_id: str,
     description: str,
@@ -510,7 +632,7 @@ def check_technician_availability(specialty: str) -> List[Dict[str, Any]]:
 # Approval Tool (Human-in-the-loop)
 # ============================================================================
 
-@tool
+@tool(args_schema=ApprovalInput)
 def request_approval(machine_id: str, description: str, priority: str) -> Dict[str, Any]:
     """
     Request supervisor approval for a maintenance ticket via MCP.
