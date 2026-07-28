@@ -201,23 +201,40 @@ class GuardrailsMiddlewareHandler(BaseCallbackHandler):
 # Agent Factory with Middleware Support
 # ============================================================================
 
-def create_agent_with_middleware(model, tools, system_prompt: str, middleware: List[Any] = None, **kwargs):
+def create_agent_with_middleware(
+    model,
+    tools,
+    system_prompt: str,
+    middleware: List[Any] = None,
+    checkpointer=None,
+    store=None,
+    **kwargs
+):
     """
-    Factory function that creates an agent with guardrails middleware.
+    Factory function that creates an agent with guardrails middleware and memory.
 
-    Middleware pattern: Define middleware, pass to factory, middleware intercepts I/O
+    Pattern: Define middleware, checkpointer, and store, pass to factory
+    Agent integrates all three: LLM + tools + middleware + memory
 
     Args:
         model: LangChain LLM model
         tools: List of tools available to agent
         system_prompt: System prompt for agent
         middleware: List of middleware objects (InputValidationMiddleware, etc.)
+        checkpointer: State checkpointer for persistence (e.g., SqliteSaver)
+        store: Store for persistent information across threads/sessions
         **kwargs: Additional arguments to pass to create_agent
 
     Returns:
-        Agent with middleware callbacks pre-configured
+        Agent with middleware callbacks and memory (checkpointer/store) pre-configured
 
     Example:
+        from langgraph.checkpoint.sqlite import SqliteSaver
+        from langgraph.store.sqlite import SqliteStore
+
+        checkpointer = SqliteSaver(db_path="agent_state.db")
+        store = SqliteStore(db_path="agent_memory.db")
+
         agent = create_agent_with_middleware(
             model=ChatGoogleGenerativeAI(...),
             tools=get_all_tools(),
@@ -226,19 +243,39 @@ def create_agent_with_middleware(model, tools, system_prompt: str, middleware: L
                 InputValidationMiddleware(strategy=GuardrailsStrategy.BLOCK),
                 ToolInputValidationMiddleware(strategy=GuardrailsStrategy.BLOCK),
                 OutputValidationMiddleware(strategy=GuardrailsStrategy.BLOCK)
-            ]
+            ],
+            checkpointer=checkpointer,
+            store=store
         )
     """
     from langchain.agents import create_agent
 
-    logger.info(f"Creating agent with {len(middleware) if middleware else 0} middleware layers")
+    logger.info(
+        f"Creating agent with middleware={len(middleware) if middleware else 0}, "
+        f"checkpointer={checkpointer is not None}, "
+        f"store={store is not None}"
+    )
+
+    # Create base agent with memory (checkpointer, store)
+    agent_kwargs = {
+        "system_prompt": system_prompt,
+        **kwargs
+    }
+
+    # Add memory configuration if provided
+    if checkpointer:
+        agent_kwargs["checkpointer"] = checkpointer
+        logger.info("Checkpointer added to agent for state persistence")
+
+    if store:
+        agent_kwargs["store"] = store
+        logger.info("Store added to agent for persistent memory across threads")
 
     # Create base agent
     agent = create_agent(
         model,
         tools=tools,
-        system_prompt=system_prompt,
-        **kwargs
+        **agent_kwargs
     )
 
     # Apply middleware via callback handler

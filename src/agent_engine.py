@@ -304,8 +304,15 @@ class AgentEngine:
         self.session_start_time = datetime.now()
         self.conversation_history: List[Dict[str, str]] = []
 
-        # Initialize memory (MCP-compatible)
+        # ===== INITIALIZE MEMORY COMPONENTS =====
+        # Conversation memory for session context
         self.memory = ConversationMemory(max_messages=50)
+
+        # State checkpointer for agent state persistence
+        self.checkpointer = self._initialize_checkpointer()
+
+        # Store for persistent information across threads/sessions
+        self.store = self._initialize_store()
 
         logger.info(f"Initializing AgentEngine for role: {role}")
 
@@ -328,6 +335,56 @@ class AgentEngine:
     # ========================================================================
     # Initialization Methods
     # ========================================================================
+
+    def _initialize_checkpointer(self):
+        """
+        Initialize state checkpointer for agent state persistence.
+
+        Stores agent execution state (messages, tool calls, etc.) for recovery
+        and multi-turn conversations across sessions.
+
+        Returns:
+            Checkpointer instance (SqliteSaver or similar)
+        """
+        try:
+            # Try to import langgraph checkpointer
+            from langgraph.checkpoint.sqlite import SqliteSaver
+
+            checkpoint_path = "data/agent_state.db"
+            checkpointer = SqliteSaver(db_path=checkpoint_path)
+            logger.info(f"State checkpointer initialized: {checkpoint_path}")
+            return checkpointer
+        except ImportError:
+            logger.warning("langgraph not available, checkpointer disabled")
+            return None
+        except Exception as e:
+            logger.error(f"Failed to initialize checkpointer: {str(e)}")
+            return None
+
+    def _initialize_store(self):
+        """
+        Initialize store for persistent information across threads/sessions.
+
+        Stores agent-generated information (summaries, facts, context) that
+        persists across multiple conversations and user sessions.
+
+        Returns:
+            Store instance (SqliteStore or similar)
+        """
+        try:
+            # Try to import langgraph store
+            from langgraph.store.sqlite import SqliteStore
+
+            store_path = "data/agent_memory.db"
+            store = SqliteStore(db_path=store_path)
+            logger.info(f"Persistent store initialized: {store_path}")
+            return store
+        except ImportError:
+            logger.warning("langgraph not available, store disabled")
+            return None
+        except Exception as e:
+            logger.error(f"Failed to initialize store: {str(e)}")
+            return None
 
     def _initialize_model(self):
         """
@@ -420,15 +477,19 @@ SAFETY & QUALITY GUARDRAILS:
             ]
             logger.info(f"Guardrails middleware stack defined: {[mw.name for mw in middleware_stack]}")
 
-            # ===== CREATE AGENT WITH GUARDRAILS MIDDLEWARE =====
-            # Use factory pattern: create_agent_with_middleware(model, tools, system_prompt, middleware=[...])
-            # Middleware is defined and passed to agent creation
-            # Callbacks are automatically bound to agent - no configuration needed at query time
+            # ===== CREATE AGENT WITH GUARDRAILS MIDDLEWARE + MEMORY =====
+            # Use factory pattern with three components:
+            # 1. Middleware stack for input/output validation
+            # 2. Checkpointer for agent state persistence
+            # 3. Store for persistent memory across threads/sessions
+            # All integrated via create_agent_with_middleware() factory
             self.agent = create_agent_with_middleware(
                 model=self.model,
                 tools=self.tools,
                 system_prompt=system_prompt_with_guardrails,
                 middleware=middleware_stack,
+                checkpointer=self.checkpointer,
+                store=self.store,
                 debug=settings.app_env == "development"
             )
 
@@ -442,22 +503,31 @@ SAFETY & QUALITY GUARDRAILS:
                 "type": "manufacturing_assistant",
                 "role": self.role,
                 "tools_count": len(self.tools),
-                "memory_type": "ConversationMemory",
-                "mcp_enabled": True,
+                # Memory components
+                "memory": {
+                    "session_memory": "ConversationMemory",
+                    "checkpointer": "SqliteSaver" if self.checkpointer else None,
+                    "store": "SqliteStore" if self.store else None,
+                },
+                # Guardrails
                 "guardrails_enabled": True,
                 "guardrails_pattern": "middleware",
                 "guardrails_middleware_stack": [mw.name for mw in middleware_stack],
+                # MCP
+                "mcp_enabled": True,
+                # Agent
                 "guardrails_factory": "create_agent_with_middleware()",
                 "agent_type": "create_agent",
             }
 
             logger.info(
-                f"Agent created with guardrails middleware - Role: {self.role}, "
+                f"Agent created with middleware + memory - Role: {self.role}, "
                 f"Tools: {len(self.tools)}, "
-                f"Memory: ConversationMemory, "
-                f"MCP: enabled, "
-                f"Guardrails: {[mw.name for mw in middleware_stack]} (factory pattern), "
-                f"Agent type: create_agent (CompiledStateGraph)"
+                f"Memory: ConversationMemory + "
+                f"{'Checkpointer (state persistence) + ' if self.checkpointer else ''}"
+                f"{'Store (cross-thread memory)' if self.store else ''}, "
+                f"Guardrails: {[mw.name for mw in middleware_stack]}, "
+                f"MCP: enabled"
             )
 
             return self.agent
