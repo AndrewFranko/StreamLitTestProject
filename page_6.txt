@@ -1,0 +1,22 @@
+None
+● search_machine()
+●
+lookup_error_code()
+This agent combines machine and error analysis to keep the lab manageable.
+3. Maintenance Request Agent
+Responsibilities
+● Present the recommended action
+● Pause for user approval
+● Create a simulated maintenance request
+● Generate confirmation
+Tool
+None
+create_maintenance_ticket()
+The tool can append the ticket to an in-memory list or local JSON file.
+Level 4 : Deploy Your AI Application
+The client is satisfied with the application and wants it to be accessible to internal users for
+demonstration and testing.
+Your task is to deploy the AI application and make it available through a web interface.
+Technical Focus
+● Streamlit Deployment
+● Environment Variables
