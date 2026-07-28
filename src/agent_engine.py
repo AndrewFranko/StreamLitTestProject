@@ -31,15 +31,15 @@ except ImportError as e:
         raise
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
-from langchain.agents import create_agent
 
 from src.config import settings
 from src.tools import get_all_tools, ConversationMemory
-from src.guardrails_middleware import (
-    InputGuardrailsMiddleware,
-    ToolInputGuardrailsMiddleware,
-    OutputGuardrailsMiddleware,
-    GuardrailsCallbackHandler,
+from src.guardrails_middleware_layer import (
+    create_agent_with_middleware,
+    InputValidationMiddleware,
+    ToolInputValidationMiddleware,
+    OutputValidationMiddleware,
+    GuardrailsStrategy,
 )
 
 logger = logging.getLogger(__name__)
@@ -410,32 +410,33 @@ SAFETY & QUALITY GUARDRAILS:
 
 {guardrails}"""
 
-            # ===== INITIALIZE GUARDRAILS MIDDLEWARE AT AGENT CREATION =====
-            # Create guardrails callback handler for runtime validation
-            self.guardrails_handler = GuardrailsCallbackHandler()
-            logger.info(f"Initialized guardrails middleware handler")
+            # ===== DEFINE GUARDRAILS MIDDLEWARE STACK =====
+            # Middleware intercepts inputs/outputs during agent execution
+            # Applied in order: input validation → tool validation → output validation
+            middleware_stack = [
+                InputValidationMiddleware(strategy=GuardrailsStrategy.BLOCK),
+                ToolInputValidationMiddleware(strategy=GuardrailsStrategy.BLOCK),
+                OutputValidationMiddleware(strategy=GuardrailsStrategy.BLOCK),
+            ]
+            logger.info(f"Guardrails middleware stack defined: {[mw.name for mw in middleware_stack]}")
 
-            # ===== CREATE AGENT USING LANGCHAIN'S create_agent =====
-            # Note: create_agent() doesn't directly accept callbacks parameter
-            # Instead, we apply callbacks via with_config() which is the LangChain pattern
-            self.agent = create_agent(
-                self.model,
+            # ===== CREATE AGENT WITH GUARDRAILS MIDDLEWARE =====
+            # Use factory pattern: create_agent_with_middleware(model, tools, system_prompt, middleware=[...])
+            # Middleware is defined and passed to agent creation
+            # Callbacks are automatically bound to agent - no configuration needed at query time
+            self.agent = create_agent_with_middleware(
+                model=self.model,
                 tools=self.tools,
                 system_prompt=system_prompt_with_guardrails,
+                middleware=middleware_stack,
                 debug=settings.app_env == "development"
             )
 
             # Store system message for reference
             self.system_message = SystemMessage(content=system_prompt_with_guardrails)
 
-            # ===== APPLY GUARDRAILS MIDDLEWARE VIA with_config() =====
-            # This is LangChain's standard pattern for integrating callbacks at agent creation
-            # with_config() binds the callbacks to the agent's runnable config
-            # All subsequent invocations will use these callbacks automatically
-            self.agent = self.agent.with_config(
-                {"callbacks": [self.guardrails_handler]}
-            )
-            logger.info(f"Guardrails middleware bound to agent via with_config()")
+            # Store middleware for inspection/monitoring
+            self.middleware_stack = middleware_stack
 
             self.agent_metadata = {
                 "type": "manufacturing_assistant",
@@ -444,18 +445,18 @@ SAFETY & QUALITY GUARDRAILS:
                 "memory_type": "ConversationMemory",
                 "mcp_enabled": True,
                 "guardrails_enabled": True,
-                "guardrails_type": "middleware",
-                "guardrails_integrated_at": "_initialize_agent() via with_config()",
-                "guardrails_callbacks": ["input_validation", "tool_validation", "output_validation"],
+                "guardrails_pattern": "middleware",
+                "guardrails_middleware_stack": [mw.name for mw in middleware_stack],
+                "guardrails_factory": "create_agent_with_middleware()",
                 "agent_type": "create_agent",
             }
 
             logger.info(
-                f"Agent created with integrated guardrails - Role: {self.role}, "
+                f"Agent created with guardrails middleware - Role: {self.role}, "
                 f"Tools: {len(self.tools)}, "
                 f"Memory: ConversationMemory, "
                 f"MCP: enabled, "
-                f"Guardrails: integrated at create_agent() + with_config(), "
+                f"Guardrails: {[mw.name for mw in middleware_stack]} (factory pattern), "
                 f"Agent type: create_agent (CompiledStateGraph)"
             )
 
@@ -491,13 +492,11 @@ SAFETY & QUALITY GUARDRAILS:
                 - success: Boolean indicating successful processing
         """
         try:
-            # ===== INPUT GUARDRAILS MIDDLEWARE =====
-            # Validate user input (guardrails applied at agent creation, but we validate early too)
-            input_validation = InputGuardrailsMiddleware.validate_user_input(user_input)
-            user_input = input_validation["input"]
-
+            # ===== GUARDRAILS MIDDLEWARE ALREADY APPLIED AT AGENT CREATION =====
+            # Middleware is applied via create_agent_with_middleware() factory pattern
+            # Input validation, tool validation, and output validation are automatic
             logger.info(f"Processing query - Role: {self.role}, Input length: {len(user_input)}, "
-                       f"Guardrails: enabled (agent-level middleware)")
+                       f"Guardrails: applied via middleware stack")
 
             # Add to memory for context tracking
             self.memory.add_message("user", user_input, {"role": self.role})
@@ -573,16 +572,11 @@ SAFETY & QUALITY GUARDRAILS:
 
             response_text = str(response_text).strip()
 
-            # ===== OUTPUT GUARDRAILS MIDDLEWARE =====
-            # Validate response before returning to user
-            try:
-                output_validation = OutputGuardrailsMiddleware.validate_response(response_text)
-                logger.info(f"Response passed output guardrails validation")
-            except ValueError as e:
-                logger.warning(f"Response failed output guardrails: {str(e)}")
-                response_text = "I processed your request but encountered a response validation issue."
-
-            logger.info(f"Query processed successfully - Tools used: {len(tool_calls_made)}")
+            # ===== OUTPUT VALIDATION VIA MIDDLEWARE =====
+            # Output was validated via GuardrailsMiddlewareHandler.on_llm_end() callback
+            # If response failed validation, error would have been raised during agent execution
+            logger.info(f"Query processed successfully - Tools used: {len(tool_calls_made)}, "
+                       f"Output validated by middleware")
 
             # Add response to memory
             self.memory.add_message("assistant", response_text, {
