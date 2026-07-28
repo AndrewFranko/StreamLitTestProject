@@ -102,12 +102,42 @@ if run_button and user_input.strip():
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("✅ Approve & Create Ticket", use_container_width=True):
-                    # Store approved result
-                    st.session_state.fault_workflows.insert(0, st.session_state.pending_fault_approval)
-                    st.session_state.pending_fault_approval = None
-                    st.success("✅ Ticket Created Successfully")
-                    st.balloons()
-                    st.rerun()
+                    # NOW create the ticket since user approved
+                    import sys
+                    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+                    from level3_multi_agent_workflow import create_maintenance_ticket
+
+                    approved_result = st.session_state.pending_fault_approval["result"]
+                    fault_data = approved_result.get("fault_analysis", {})
+                    diagnosis = approved_result.get("diagnosis", {})
+
+                    machine_id = fault_data.get("machine_id", "UNKNOWN")
+                    error_code = fault_data.get("error_code", "UNKNOWN")
+                    severity = diagnosis.get("severity", "unknown")
+                    recommended_action = diagnosis.get("recommended_action", "Contact supervisor")
+
+                    # Create the ticket
+                    ticket_result = create_maintenance_ticket(
+                        machine_id=machine_id,
+                        error_code=error_code,
+                        description=recommended_action,
+                        severity=severity
+                    )
+
+                    if ticket_result["success"]:
+                        # Update result with ticket info
+                        approved_result["ticket_created"] = True
+                        approved_result["ticket_id"] = ticket_result["ticket_id"]
+
+                        # Store in history
+                        st.session_state.fault_workflows.insert(0, st.session_state.pending_fault_approval)
+                        st.session_state.pending_fault_approval = None
+
+                        st.success(f"✅ Ticket Created: {ticket_result['ticket_id']}")
+                        st.balloons()
+                        st.rerun()
+                    else:
+                        st.error(f"Failed to create ticket: {ticket_result.get('error', 'Unknown error')}")
 
             with col2:
                 if st.button("❌ Reject - Don't Create", use_container_width=True):
