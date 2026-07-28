@@ -35,6 +35,12 @@ from langchain.agents import create_agent
 
 from src.config import settings
 from src.tools import get_all_tools, ConversationMemory
+from src.guardrails_middleware import (
+    InputGuardrailsMiddleware,
+    ToolInputGuardrailsMiddleware,
+    OutputGuardrailsMiddleware,
+    GuardrailsCallbackHandler,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -465,15 +471,10 @@ SAFETY & QUALITY GUARDRAILS:
                 - success: Boolean indicating successful processing
         """
         try:
-            # Validate input
-            if not user_input or not isinstance(user_input, str):
-                raise ValueError("User input must be a non-empty string")
-
-            user_input = user_input.strip()
-            if len(user_input) < 2:
-                raise ValueError("User input must be at least 2 characters")
-            if len(user_input) > 2000:
-                raise ValueError("User input cannot exceed 2000 characters")
+            # ===== INPUT GUARDRAILS MIDDLEWARE =====
+            # Validate user input before processing
+            input_validation = InputGuardrailsMiddleware.validate_user_input(user_input)
+            user_input = input_validation["input"]
 
             logger.info(f"Processing query - Role: {self.role}, Input length: {len(user_input)}")
 
@@ -499,11 +500,14 @@ SAFETY & QUALITY GUARDRAILS:
 
             logger.debug(f"Invoking create_agent with {len(messages)} messages")
 
-            # Invoke the agent (create_agent returns CompiledStateGraph)
+            # ===== INVOKE AGENT WITH GUARDRAILS MIDDLEWARE =====
             try:
-                result = self.agent.invoke({
-                    "messages": messages
-                })
+                # Include guardrails callback handler during invocation
+                guardrails_handler = GuardrailsCallbackHandler()
+                result = self.agent.invoke(
+                    {"messages": messages},
+                    config={"callbacks": [guardrails_handler]}
+                )
                 logger.debug(f"Agent invocation succeeded - Result type: {type(result)}")
             except Exception as e:
                 logger.error(f"Agent invocation failed: {str(e)}")
@@ -549,6 +553,15 @@ SAFETY & QUALITY GUARDRAILS:
                 response_text = "I processed your request but have no response to provide."
 
             response_text = str(response_text).strip()
+
+            # ===== OUTPUT GUARDRAILS MIDDLEWARE =====
+            # Validate response before returning to user
+            try:
+                output_validation = OutputGuardrailsMiddleware.validate_response(response_text)
+                logger.info(f"Response passed output guardrails validation")
+            except ValueError as e:
+                logger.warning(f"Response failed output guardrails: {str(e)}")
+                response_text = "I processed your request but encountered a response validation issue."
 
             logger.info(f"Query processed successfully - Tools used: {len(tool_calls_made)}")
 
