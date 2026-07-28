@@ -7,6 +7,8 @@ This implements a fault-handling workflow where:
 3. Maintenance Request Agent presents recommendation and creates ticket
 
 Workflow: "Machine MX-204 stopped with error E17. Check and create maintenance request."
+
+Integrates with LangSmith for tracing agent execution and tool calls.
 """
 
 import json
@@ -14,6 +16,12 @@ import os
 from typing import Any, TypedDict
 from datetime import datetime
 import sys
+
+# Setup LangSmith tracing
+try:
+    from src.langsmith_config import LANGSMITH_ENABLED
+except ImportError:
+    LANGSMITH_ENABLED = False
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))

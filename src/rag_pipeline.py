@@ -3,6 +3,8 @@ RAG Pipeline for MCP Ticket Server
 
 Uses LangChain to index ticket descriptions and find similar past tickets
 when creating new ones. Helps identify related issues and reduce duplicates.
+
+Integrates with LangSmith for tracing and visualization.
 """
 
 import json
@@ -12,7 +14,14 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_core.callbacks import tracing_v2_enabled_if_api_key_set
 import logging
+
+# Setup LangSmith tracing
+try:
+    from src.langsmith_config import LANGSMITH_ENABLED
+except ImportError:
+    LANGSMITH_ENABLED = False
 
 logger = logging.getLogger(__name__)
 
@@ -100,12 +109,15 @@ Status: {ticket.get('status', 'N/A')}
             logger.error(f"Failed to build vector store: {e}")
 
     def find_similar_tickets(self, query: str, k: int = 3) -> List[Dict[str, Any]]:
-        """Find similar past tickets using semantic search."""
+        """Find similar past tickets using semantic search.
+
+        This method is traced by LangSmith if configured.
+        """
         if not self.vectorstore or not self.embeddings:
             return []
 
         try:
-            # Search similar documents
+            # Search similar documents (traced by LangChain)
             results = self.vectorstore.similarity_search_with_score(query, k=k)
 
             # Extract unique ticket IDs
