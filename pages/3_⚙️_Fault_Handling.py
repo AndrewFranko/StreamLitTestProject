@@ -283,9 +283,13 @@ if st.session_state.pending_fault_approval and not st.session_state.approved_fau
                 st.error("Tickets file not found")
 
         elif result.get("awaiting_approval"):
-            st.warning("⏳ Ticket Awaiting Human Approval")
+            st.warning("⏳ PENDING APPROVAL - Awaiting human review")
+
+            fault = result["fault_analysis"]
+            diagnosis = result["diagnosis"]
+
             st.info("""
-            **Ticket will be created with the following details:**
+            **Preview of ticket that will be created:**
 
             Once you approve using the buttons below, this ticket will be:
             1. Created in the maintenance system
@@ -293,22 +297,25 @@ if st.session_state.pending_fault_approval and not st.session_state.approved_fau
             3. Tracked for completion
             """)
 
-            # Preview of what will be created
-            fault = result["fault_analysis"]
-            diagnosis = result["diagnosis"]
-
             st.divider()
-            st.subheader("Preview (if approved)")
-            preview_data = {
-                "ticket_id": f"TICK-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                "machine_id": fault.get("machine_id"),
-                "error_code": fault.get("error_code"),
-                "severity": diagnosis.get("severity"),
-                "description": diagnosis.get("recommended_action"),
-                "status": "will be OPEN",
-                "assigned_technician": "will be assigned"
-            }
-            st.json(preview_data, expanded=False)
+            st.subheader("Ticket Preview (if approved)")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                preview_data = {
+                    "machine_id": fault.get("machine_id"),
+                    "error_code": fault.get("error_code"),
+                    "severity": diagnosis.get("severity").upper(),
+                    "status": "OPEN (once approved)"
+                }
+                st.json(preview_data, expanded=True)
+
+            with col2:
+                st.write("**Recommended Action:**")
+                st.write(diagnosis.get("recommended_action"))
+                st.divider()
+                st.write("**Root Cause:**")
+                st.write(diagnosis.get("root_cause"))
 
         else:
             st.error("❌ Ticket creation failed")
