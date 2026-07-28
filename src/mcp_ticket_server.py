@@ -198,7 +198,7 @@ def search_tickets(query: str) -> List[Dict[str, Any]]:
 def get_tickets_by_priority(priority: str) -> List[Dict[str, Any]]:
     """Get all tickets with a specific priority level."""
     tickets = load_tickets()
-    return [t for t in tickets if t["priority"].lower() == priority.lower()]
+    return [t for t in tickets if t.get("priority", t.get("severity", "")).lower() == priority.lower()]
 
 
 def get_open_tickets() -> List[Dict[str, Any]]:
