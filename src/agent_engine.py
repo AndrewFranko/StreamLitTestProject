@@ -584,14 +584,20 @@ SAFETY & QUALITY GUARDRAILS:
                 - success: Boolean indicating successful processing
         """
         try:
+            # ===== QUERY-TIME INPUT VALIDATION =====
+            # Validate input before sending to agent (fail-fast)
+            from guardrails_middleware_layer import InputValidationMiddleware
+            input_validator = InputValidationMiddleware(strategy="block")
+            validated_input = input_validator.intercept(user_input)
+
             # ===== GUARDRAILS MIDDLEWARE ALREADY APPLIED AT AGENT CREATION =====
             # Middleware is applied via create_agent_with_middleware() factory pattern
-            # Input validation, tool validation, and output validation are automatic
-            logger.info(f"Processing query - Role: {self.role}, Input length: {len(user_input)}, "
-                       f"Guardrails: applied via middleware stack")
+            # Tool validation and output validation are automatic
+            logger.info(f"Processing query - Role: {self.role}, Input length: {len(validated_input)}, "
+                       f"Guardrails: query-time + agent-time middleware applied")
 
-            # Add to memory for context tracking
-            self.memory.add_message("user", user_input, {"role": self.role})
+            # Add validated input to memory for context tracking
+            self.memory.add_message("user", validated_input, {"role": self.role})
             logger.debug(f"Query added to memory. Total messages: {len(self.memory.messages)}")
 
             # Build message list from conversation history (MCP-compatible)
@@ -607,8 +613,8 @@ SAFETY & QUALITY GUARDRAILS:
                 else:
                     messages.append(msg)
 
-            # Add current user message
-            messages.append(HumanMessage(content=user_input))
+            # Add current user message (already validated)
+            messages.append(HumanMessage(content=validated_input))
 
             logger.debug(f"Invoking create_agent with {len(messages)} messages")
 

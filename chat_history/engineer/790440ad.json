@@ -1,0 +1,17 @@
+{
+  "id": "790440ad",
+  "name": "Chat - 2026-07-28 14:25",
+  "role": "Engineer",
+  "created": "2026-07-28T14:25:46.238738",
+  "last_updated": "2026-07-28T14:26:03.717156",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi my name is Mike, please remember"
+    },
+    {
+      "role": "agent",
+      "content": "Hello Mike! I have noted your name. How can I assist you with your maintenance tasks today?"
+    }
+  ]
+}
