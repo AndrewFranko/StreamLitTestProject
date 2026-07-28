@@ -410,12 +410,14 @@ SAFETY & QUALITY GUARDRAILS:
 
 {guardrails}"""
 
-            # ===== GUARDRAILS MIDDLEWARE SETUP AT AGENT CREATION =====
-            # Initialize guardrails callback handler for runtime validation
+            # ===== INITIALIZE GUARDRAILS MIDDLEWARE AT AGENT CREATION =====
+            # Create guardrails callback handler for runtime validation
             self.guardrails_handler = GuardrailsCallbackHandler()
             logger.info(f"Initialized guardrails middleware handler")
 
-            # Create agent using LangChain's create_agent with MCP support
+            # ===== CREATE AGENT USING LANGCHAIN'S create_agent =====
+            # Note: create_agent() doesn't directly accept callbacks parameter
+            # Instead, we apply callbacks via with_config() which is the LangChain pattern
             self.agent = create_agent(
                 self.model,
                 tools=self.tools,
@@ -426,11 +428,14 @@ SAFETY & QUALITY GUARDRAILS:
             # Store system message for reference
             self.system_message = SystemMessage(content=system_prompt_with_guardrails)
 
-            # Bind guardrails handler to agent for all invocations
-            # This ensures guardrails are applied at agent execution time
-            self.agent_with_guardrails = self.agent.with_config(
+            # ===== APPLY GUARDRAILS MIDDLEWARE VIA with_config() =====
+            # This is LangChain's standard pattern for integrating callbacks at agent creation
+            # with_config() binds the callbacks to the agent's runnable config
+            # All subsequent invocations will use these callbacks automatically
+            self.agent = self.agent.with_config(
                 {"callbacks": [self.guardrails_handler]}
             )
+            logger.info(f"Guardrails middleware bound to agent via with_config()")
 
             self.agent_metadata = {
                 "type": "manufacturing_assistant",
@@ -440,20 +445,21 @@ SAFETY & QUALITY GUARDRAILS:
                 "mcp_enabled": True,
                 "guardrails_enabled": True,
                 "guardrails_type": "middleware",
+                "guardrails_integrated_at": "_initialize_agent() via with_config()",
                 "guardrails_callbacks": ["input_validation", "tool_validation", "output_validation"],
                 "agent_type": "create_agent",
             }
 
             logger.info(
-                f"Agent created with guardrails middleware - Role: {self.role}, "
+                f"Agent created with integrated guardrails - Role: {self.role}, "
                 f"Tools: {len(self.tools)}, "
                 f"Memory: ConversationMemory, "
                 f"MCP: enabled, "
-                f"Guardrails: middleware (callbacks), "
+                f"Guardrails: integrated at create_agent() + with_config(), "
                 f"Agent type: create_agent (CompiledStateGraph)"
             )
 
-            return self.agent_with_guardrails
+            return self.agent
 
         except Exception as e:
             logger.error(f"Failed to initialize agent: {str(e)}")
@@ -515,12 +521,13 @@ SAFETY & QUALITY GUARDRAILS:
 
             logger.debug(f"Invoking create_agent with {len(messages)} messages")
 
-            # ===== INVOKE AGENT WITH GUARDRAILS MIDDLEWARE (ALREADY BOUND AT CREATION) =====
+            # ===== INVOKE AGENT WITH GUARDRAILS MIDDLEWARE (BAKED INTO AGENT AT CREATION) =====
             try:
-                # Agent is created with guardrails callbacks already bound
-                # No need to pass callbacks here - they're part of agent configuration
-                result = self.agent_with_guardrails.invoke({"messages": messages})
-                logger.debug(f"Agent invocation succeeded - Result type: {type(result)}")
+                # Agent was created with guardrails callbacks already integrated
+                # Guardrails are applied at agent execution level (create_agent parameter)
+                # No need to pass callbacks here - they're part of agent's lifecycle
+                result = self.agent.invoke({"messages": messages})
+                logger.debug(f"Agent invocation succeeded - Guardrails applied during execution")
             except Exception as e:
                 logger.error(f"Agent invocation failed: {str(e)}")
                 raise
