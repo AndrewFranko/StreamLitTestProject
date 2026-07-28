@@ -122,8 +122,9 @@ else:
                         st.caption(f"Machine: {ticket['machine_id']}")
 
                     with col2:
-                        priority_emoji = "🔴" if ticket["priority"] == "critical" else "🟠" if ticket["priority"] == "high" else "🟡" if ticket["priority"] == "medium" else "🟢"
-                        st.markdown(f"{priority_emoji} **{ticket['priority'].upper()}**")
+                        priority = ticket.get("priority") or ticket.get("severity", "unknown")
+                        priority_emoji = "🔴" if priority == "critical" else "🟠" if priority == "high" else "🟡" if priority == "medium" else "🟢"
+                        st.markdown(f"{priority_emoji} **{priority.upper()}**")
                         st.caption(f"Status: {ticket['status'].upper()}")
 
                     with col3:
