@@ -145,179 +145,179 @@ if run_button and user_input.strip():
                 st.rerun()
 
         # ====================================================================
-        # TAB 1: Workflow Summary (only show if no pending approval)
+        # TABS: Only show if no pending approval
         # ====================================================================
         if not st.session_state.pending_fault_approval:
             tab1, tab2, tab3, tab4 = st.tabs(
                 ["📋 Summary", "🔍 Fault Analysis", "🔧 Diagnosis", "🎫 Ticket"]
             )
 
-        with tab1:
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.metric(
-                    "Status",
-                    "✅ Success" if result["ticket_created"] else "❌ Failed"
-                )
-
-            with col2:
-                st.metric(
-                    "Ticket ID",
-                    result["ticket_id"] if result["ticket_created"] else "N/A"
-                )
-
-            with col3:
-                severity = result.get("diagnosis", {}).get("severity", "unknown")
-                st.metric("Severity", severity.upper())
-
-            st.divider()
-
-            # Final Response
-            st.subheader("Final Response")
-            st.info(result["final_response"])
-
-            # Error (if any)
-            if result.get("error"):
-                st.error(f"**Error**: {result['error']}")
-
-        # ====================================================================
-        # TAB 2: Fault Analysis Output
-        # ====================================================================
-        with tab2:
-            st.subheader("Fault Analysis Agent Output")
-            st.markdown("*Extracted structured information from user input*")
-
-            fault = result["fault_analysis"]
-            col1, col2, col3, col4 = st.columns(4)
-
-            with col1:
-                st.metric("Machine ID", fault.get("machine_id", "N/A"))
-            with col2:
-                st.metric("Error Code", fault.get("error_code", "N/A"))
-            with col3:
-                st.metric("Request Type", fault.get("request_type", "N/A"))
-            with col4:
-                missing = len(fault.get("missing_fields", []))
-                st.metric("Missing Fields", missing)
-
-            st.json(fault, expanded=True)
-
-        # ====================================================================
-        # TAB 3: Diagnosis Output
-        # ====================================================================
-        with tab3:
-            st.subheader("Maintenance Diagnosis Agent Output")
-            st.markdown("*Machine & error data lookup with severity determination*")
-
-            diagnosis = result["diagnosis"]
-
-            # Machine Details
-            st.subheader("Machine Details")
-            machine = diagnosis.get("machine_details", {})
-            if "error" not in machine:
+            with tab1:
                 col1, col2, col3 = st.columns(3)
+
                 with col1:
-                    st.metric("Machine ID", machine.get("id", "N/A"))
-                    st.metric("Type", machine.get("type", "N/A"))
+                    st.metric(
+                        "Status",
+                        "✅ Success" if result["ticket_created"] else "❌ Failed"
+                    )
+
                 with col2:
-                    st.metric("Name", machine.get("name", "N/A"))
-                    st.metric("Location", machine.get("location", "N/A"))
+                    st.metric(
+                        "Ticket ID",
+                        result["ticket_id"] if result["ticket_created"] else "N/A"
+                    )
+
                 with col3:
-                    st.metric("Status", machine.get("status", "N/A"))
-                    st.metric("Temperature", f"{machine.get('temperature', 'N/A')}°C")
-
-                with st.expander("Full Machine Data"):
-                    st.json(machine)
-            else:
-                st.warning(f"Machine not found: {machine['error']}")
-
-            # Error Details
-            st.subheader("Error Code Details")
-            error = diagnosis.get("error_details", {})
-            if "error" not in error:
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Error Code", error.get("code", "N/A"))
-                    st.metric("Severity", error.get("severity", "N/A").upper())
-                with col2:
-                    st.metric("Description", error.get("description", "N/A"), label_visibility="collapsed")
-
-                st.markdown("**Symptom**:")
-                st.write(error.get("symptom", "N/A"))
-
-                st.markdown("**Recommended Action**:")
-                st.write(error.get("recommended_action", "N/A"))
-
-                with st.expander("Full Error Data"):
-                    st.json(error)
-            else:
-                st.warning(f"Error code not found: {error['error']}")
-
-            # Diagnosis Summary
-            st.divider()
-            st.subheader("Diagnosis Summary")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Root Cause", diagnosis.get("root_cause", "Unknown"))
-            with col2:
-                st.metric("Severity Level", diagnosis.get("severity", "unknown").upper())
-
-            st.markdown("**Recommended Action**:")
-            st.info(diagnosis.get("recommended_action", "No action specified"))
-
-        # ====================================================================
-        # TAB 4: Ticket Details
-        # ====================================================================
-        with tab4:
-            st.subheader("Maintenance Ticket Created")
-
-            if result["ticket_created"]:
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Ticket ID", result["ticket_id"])
-                with col2:
-                    st.metric("Status", "OPEN")
-                with col3:
-                    st.metric("Created", datetime.now().strftime("%H:%M:%S"))
+                    severity = result.get("diagnosis", {}).get("severity", "unknown")
+                    st.metric("Severity", severity.upper())
 
                 st.divider()
 
-                # Ticket Preview
+                # Final Response
+                st.subheader("Final Response")
+                st.info(result["final_response"])
+
+                # Error (if any)
+                if result.get("error"):
+                    st.error(f"**Error**: {result['error']}")
+
+            # ====================================================================
+            # TAB 2: Fault Analysis Output
+            # ====================================================================
+            with tab2:
+                st.subheader("Fault Analysis Agent Output")
+                st.markdown("*Extracted structured information from user input*")
+
                 fault = result["fault_analysis"]
+                col1, col2, col3, col4 = st.columns(4)
+
+                with col1:
+                    st.metric("Machine ID", fault.get("machine_id", "N/A"))
+                with col2:
+                    st.metric("Error Code", fault.get("error_code", "N/A"))
+                with col3:
+                    st.metric("Request Type", fault.get("request_type", "N/A"))
+                with col4:
+                    missing = len(fault.get("missing_fields", []))
+                    st.metric("Missing Fields", missing)
+
+                st.json(fault, expanded=True)
+
+            # ====================================================================
+            # TAB 3: Diagnosis Output
+            # ====================================================================
+            with tab3:
+                st.subheader("Maintenance Diagnosis Agent Output")
+                st.markdown("*Machine & error data lookup with severity determination*")
+
                 diagnosis = result["diagnosis"]
 
-                ticket_data = {
-                    "ticket_id": result["ticket_id"],
-                    "machine_id": fault.get("machine_id"),
-                    "machine_name": diagnosis.get("machine_details", {}).get("name"),
-                    "error_code": fault.get("error_code"),
-                    "severity": diagnosis.get("severity"),
-                    "description": diagnosis.get("recommended_action"),
-                    "status": "open",
-                    "created_at": datetime.now().isoformat(),
-                    "assigned_technician": None
-                }
+                # Machine Details
+                st.subheader("Machine Details")
+                machine = diagnosis.get("machine_details", {})
+                if "error" not in machine:
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Machine ID", machine.get("id", "N/A"))
+                        st.metric("Type", machine.get("type", "N/A"))
+                    with col2:
+                        st.metric("Name", machine.get("name", "N/A"))
+                        st.metric("Location", machine.get("location", "N/A"))
+                    with col3:
+                        st.metric("Status", machine.get("status", "N/A"))
+                        st.metric("Temperature", f"{machine.get('temperature', 'N/A')}°C")
 
-                st.json(ticket_data, expanded=False)
-
-                # Verify in storage
-                st.divider()
-                st.subheader("Ticket Storage")
-                tickets_path = "c:/StreamLit/data/maintenance_tickets.json"
-                if os.path.exists(tickets_path):
-                    with open(tickets_path) as f:
-                        tickets = json.load(f)
-                    st.success(f"✅ Ticket persisted to {tickets_path}")
-                    st.write(f"**Total tickets in system**: {len(tickets)}")
-                    st.write(f"**Latest ticket ID**: {tickets[-1].get('ticket_id', 'N/A')}")
+                    with st.expander("Full Machine Data"):
+                        st.json(machine)
                 else:
-                    st.error("Tickets file not found")
+                    st.warning(f"Machine not found: {machine['error']}")
 
-            else:
-                st.error("❌ Ticket creation failed")
-                if result.get("error"):
-                    st.write(f"Error: {result['error']}")
+                # Error Details
+                st.subheader("Error Code Details")
+                error = diagnosis.get("error_details", {})
+                if "error" not in error:
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Error Code", error.get("code", "N/A"))
+                        st.metric("Severity", error.get("severity", "N/A").upper())
+                    with col2:
+                        st.metric("Description", error.get("description", "N/A"), label_visibility="collapsed")
+
+                    st.markdown("**Symptom**:")
+                    st.write(error.get("symptom", "N/A"))
+
+                    st.markdown("**Recommended Action**:")
+                    st.write(error.get("recommended_action", "N/A"))
+
+                    with st.expander("Full Error Data"):
+                        st.json(error)
+                else:
+                    st.warning(f"Error code not found: {error['error']}")
+
+                # Diagnosis Summary
+                st.divider()
+                st.subheader("Diagnosis Summary")
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Root Cause", diagnosis.get("root_cause", "Unknown"))
+                with col2:
+                    st.metric("Severity Level", diagnosis.get("severity", "unknown").upper())
+
+                st.markdown("**Recommended Action**:")
+                st.info(diagnosis.get("recommended_action", "No action specified"))
+
+            # ====================================================================
+            # TAB 4: Ticket Details
+            # ====================================================================
+            with tab4:
+                st.subheader("Maintenance Ticket Created")
+
+                if result["ticket_created"]:
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Ticket ID", result["ticket_id"])
+                    with col2:
+                        st.metric("Status", "OPEN")
+                    with col3:
+                        st.metric("Created", datetime.now().strftime("%H:%M:%S"))
+
+                    st.divider()
+
+                    # Ticket Preview
+                    fault = result["fault_analysis"]
+                    diagnosis = result["diagnosis"]
+
+                    ticket_data = {
+                        "ticket_id": result["ticket_id"],
+                        "machine_id": fault.get("machine_id"),
+                        "machine_name": diagnosis.get("machine_details", {}).get("name"),
+                        "error_code": fault.get("error_code"),
+                        "severity": diagnosis.get("severity"),
+                        "description": diagnosis.get("recommended_action"),
+                        "status": "open",
+                        "created_at": datetime.now().isoformat(),
+                        "assigned_technician": None
+                    }
+
+                    st.json(ticket_data, expanded=False)
+
+                    # Verify in storage
+                    st.divider()
+                    st.subheader("Ticket Storage")
+                    tickets_path = "c:/StreamLit/data/maintenance_tickets.json"
+                    if os.path.exists(tickets_path):
+                        with open(tickets_path) as f:
+                            tickets = json.load(f)
+                        st.success(f"✅ Ticket persisted to {tickets_path}")
+                        st.write(f"**Total tickets in system**: {len(tickets)}")
+                        st.write(f"**Latest ticket ID**: {tickets[-1].get('ticket_id', 'N/A')}")
+                    else:
+                        st.error("Tickets file not found")
+
+                else:
+                    st.error("❌ Ticket creation failed")
+                    if result.get("error"):
+                        st.write(f"Error: {result['error']}")
 
 # ============================================================================
 # HISTORY: Previous Workflows
