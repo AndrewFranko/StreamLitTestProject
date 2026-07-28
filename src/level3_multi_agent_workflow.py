@@ -78,6 +78,7 @@ class WorkflowState(TypedDict):
     ticket_created: bool
     ticket_id: str
     final_response: str
+    awaiting_approval: bool  # NEW: Flag for approval workflow
 
     # Error handling
     error: str
@@ -362,7 +363,8 @@ def create_maintenance_ticket(machine_id: str, error_code: str, description: str
 
 def request_agent(state: WorkflowState) -> WorkflowState:
     """
-    Agent 3: Presents recommendation and creates maintenance ticket
+    Agent 3: Presents recommendation and WAITS FOR APPROVAL before creating ticket
+    For critical severity, requires human approval before ticket creation
     """
     diagnosis = state.get("diagnosis", {})
     fault_data = state.get("fault_analysis", {})
@@ -372,7 +374,30 @@ def request_agent(state: WorkflowState) -> WorkflowState:
     severity = diagnosis.get("severity", "unknown")
     recommended_action = diagnosis.get("recommended_action", "Contact supervisor")
 
-    logger.info(f"[Request] Creating ticket for {machine_id}/{error_code}")
+    logger.info(f"[Request] Preparing ticket for {machine_id}/{error_code} (Severity: {severity})")
+
+    # IMPORTANT: For CRITICAL severity, DON'T create ticket yet
+    # Let the UI ask for approval first
+    if severity == "critical":
+        logger.warning(f"[Request] CRITICAL SEVERITY - Awaiting user approval before creating ticket")
+        state["awaiting_approval"] = True
+        state["ticket_created"] = False
+        state["ticket_id"] = ""
+        state["final_response"] = f"""
+CRITICAL SEVERITY DETECTED
+========================================
+Machine: {machine_id}
+Error Code: {error_code}
+Severity: {severity.upper()}
+Recommended Action: {recommended_action}
+
+⚠️ THIS IS A CRITICAL FAULT
+User approval is required before creating ticket.
+        """
+        return state
+
+    # For non-critical, create ticket immediately
+    logger.info(f"[Request] Non-critical severity - Creating ticket immediately")
 
     try:
         # Create ticket using tool
@@ -386,6 +411,7 @@ def request_agent(state: WorkflowState) -> WorkflowState:
         if ticket_result["success"]:
             state["ticket_created"] = True
             state["ticket_id"] = ticket_result["ticket_id"]
+            state["awaiting_approval"] = False
             state["final_response"] = f"""
 Maintenance Request Created Successfully
 ========================================
@@ -398,6 +424,7 @@ Status: Open
             """
         else:
             state["ticket_created"] = False
+            state["awaiting_approval"] = False
             state["error"] = ticket_result.get("error", "Unknown error")
             state["final_response"] = f"Failed to create ticket: {state['error']}"
 
@@ -406,6 +433,7 @@ Status: Open
         state["error"] = str(e)
         state["final_response"] = f"Error creating ticket: {str(e)}"
         state["ticket_created"] = False
+        state["awaiting_approval"] = False
 
     return state
 
@@ -479,6 +507,7 @@ def execute_workflow(user_input: str, config: dict = None) -> dict:
         "ticket_created": False,
         "ticket_id": "",
         "final_response": "",
+        "awaiting_approval": False,
         "error": ""
     }
 
