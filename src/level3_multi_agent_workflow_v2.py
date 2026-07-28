@@ -20,6 +20,9 @@ from datetime import datetime
 import sys
 import logging
 
+# Setup logger FIRST (before any logging calls)
+logger = logging.getLogger(__name__)
+
 # Setup LangSmith tracing
 try:
     from src.langsmith_config import LANGSMITH_ENABLED
@@ -30,14 +33,16 @@ except ImportError:
 try:
     from langgraph.graph import StateGraph, END
     LANGGRAPH_AVAILABLE = True
+    logger.info("[OK] LangGraph imported successfully")
 except ImportError as e:
     LANGGRAPH_AVAILABLE = False
-    print(f"Note: langgraph not available: {e}")
+    logger.error(f"[FAIL] LangGraph import failed: {e}")
+except Exception as e:
+    LANGGRAPH_AVAILABLE = False
+    logger.error(f"[FAIL] Unexpected error importing LangGraph: {e}")
 
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-
-logger = logging.getLogger(__name__)
 
 
 # ============================================================================
@@ -374,7 +379,10 @@ def build_langgraph_workflow():
 def execute_workflow(user_input: str, config: dict = None) -> dict:
     """Execute the multi-agent workflow."""
 
+    logger.info(f"[DEBUG] execute_workflow called with LANGGRAPH_AVAILABLE={LANGGRAPH_AVAILABLE}")
+
     if not LANGGRAPH_AVAILABLE:
+        logger.error(f"[DEBUG] LANGGRAPH_AVAILABLE is False - raising ImportError")
         raise ImportError(
             "LangGraph is required for Level 3 workflow. "
             "Install: pip install langgraph"
