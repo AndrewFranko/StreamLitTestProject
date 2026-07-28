@@ -30,7 +30,7 @@ except ImportError:
 try:
     from langgraph.graph import StateGraph, END
     from langgraph.checkpoint.sqlite import SqliteSaver
-    from langgraph.graph.message import add_messages
+    from langchain_core.messages import add_messages
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     LANGGRAPH_AVAILABLE = False
