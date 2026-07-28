@@ -200,5 +200,192 @@
     "status": "open",
     "created_at": "2026-07-28T14:45:41.898252",
     "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728144706",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:47:06.016186",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728144706",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:47:06.824447",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145250",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:52:50.624192",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145251",
+    "machine_id": "MX-105",
+    "machine_name": "Unknown",
+    "error_code": "E23",
+    "description": "Check bearing wear, lubrication level, spindle balance",
+    "severity": "medium",
+    "status": "open",
+    "created_at": "2026-07-28T14:52:51.430252",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145252",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:52:52.184040",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145252",
+    "machine_id": "UNKNOWN",
+    "machine_name": "Unknown",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:52:52.931062",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145253",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "UNKNOWN",
+    "description": "Contact maintenance supervisor",
+    "severity": "unknown",
+    "status": "open",
+    "created_at": "2026-07-28T14:52:53.816153",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145314",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:14.507713",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145315",
+    "machine_id": "MX-201",
+    "machine_name": "CNC Milling Machine A",
+    "error_code": "E23",
+    "description": "Check bearing wear, lubrication level, spindle balance",
+    "severity": "medium",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:15.242838",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145316",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:16.057496",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145316",
+    "machine_id": "UNKNOWN",
+    "machine_name": "Unknown",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:16.854474",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145317",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "UNKNOWN",
+    "description": "Contact maintenance supervisor",
+    "severity": "unknown",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:17.612172",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145326",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:26.284109",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145327",
+    "machine_id": "MX-201",
+    "machine_name": "CNC Milling Machine A",
+    "error_code": "E23",
+    "description": "Check bearing wear, lubrication level, spindle balance",
+    "severity": "medium",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:27.075187",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145327",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:27.831909",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145328",
+    "machine_id": "UNKNOWN",
+    "machine_name": "Unknown",
+    "error_code": "E17",
+    "description": "Inspect hydraulic lines, check pump pressure, possible seal replacement",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:28.647091",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260728145329",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "UNKNOWN",
+    "description": "Contact maintenance supervisor",
+    "severity": "unknown",
+    "status": "open",
+    "created_at": "2026-07-28T14:53:29.448165",
+    "assigned_technician": null
   }
 ]
