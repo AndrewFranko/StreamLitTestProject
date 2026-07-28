@@ -356,17 +356,18 @@ class AgentEngine:
 
     def _initialize_agent(self):
         """
-        Initialize LangChain agent with memory, tools, MCP, and guardrails.
+        Initialize LangChain agent with memory, tools, MCP, and guardrails middleware.
 
         Architecture:
         - System Message: Role-based prompts with guardrails
         - Memory: ConversationMemory for context management
         - Tools: Manufacturing tools with MCP support
+        - Guardrails Middleware: Applied at agent creation (callbacks)
         - Agent: LangChain's create_agent with proper tool calling
-        - Guardrails: Safety constraints and response validation
+        - Callbacks: GuardrailsCallbackHandler for runtime validation
 
         Returns:
-            AgentExecutor with all components
+            Agent with integrated guardrails middleware
 
         Raises:
             Exception: If agent initialization fails
@@ -375,7 +376,7 @@ class AgentEngine:
             # Get system prompt for the role
             base_system_prompt = SYSTEM_PROMPTS.get(self.role, SYSTEM_PROMPTS["operator"])
 
-            # Add comprehensive guardrails
+            # Add comprehensive guardrails (text-based in system prompt)
             guardrails = f"""
 SAFETY & QUALITY GUARDRAILS:
 1. Response Quality:
@@ -409,6 +410,11 @@ SAFETY & QUALITY GUARDRAILS:
 
 {guardrails}"""
 
+            # ===== GUARDRAILS MIDDLEWARE SETUP AT AGENT CREATION =====
+            # Initialize guardrails callback handler for runtime validation
+            self.guardrails_handler = GuardrailsCallbackHandler()
+            logger.info(f"Initialized guardrails middleware handler")
+
             # Create agent using LangChain's create_agent with MCP support
             self.agent = create_agent(
                 self.model,
@@ -420,6 +426,12 @@ SAFETY & QUALITY GUARDRAILS:
             # Store system message for reference
             self.system_message = SystemMessage(content=system_prompt_with_guardrails)
 
+            # Bind guardrails handler to agent for all invocations
+            # This ensures guardrails are applied at agent execution time
+            self.agent_with_guardrails = self.agent.with_config(
+                {"callbacks": [self.guardrails_handler]}
+            )
+
             self.agent_metadata = {
                 "type": "manufacturing_assistant",
                 "role": self.role,
@@ -427,19 +439,21 @@ SAFETY & QUALITY GUARDRAILS:
                 "memory_type": "ConversationMemory",
                 "mcp_enabled": True,
                 "guardrails_enabled": True,
+                "guardrails_type": "middleware",
+                "guardrails_callbacks": ["input_validation", "tool_validation", "output_validation"],
                 "agent_type": "create_agent",
             }
 
             logger.info(
-                f"Agent created and initialized - Role: {self.role}, "
+                f"Agent created with guardrails middleware - Role: {self.role}, "
                 f"Tools: {len(self.tools)}, "
                 f"Memory: ConversationMemory, "
                 f"MCP: enabled, "
-                f"Guardrails: enabled, "
+                f"Guardrails: middleware (callbacks), "
                 f"Agent type: create_agent (CompiledStateGraph)"
             )
 
-            return self.agent
+            return self.agent_with_guardrails
 
         except Exception as e:
             logger.error(f"Failed to initialize agent: {str(e)}")
@@ -472,11 +486,12 @@ SAFETY & QUALITY GUARDRAILS:
         """
         try:
             # ===== INPUT GUARDRAILS MIDDLEWARE =====
-            # Validate user input before processing
+            # Validate user input (guardrails applied at agent creation, but we validate early too)
             input_validation = InputGuardrailsMiddleware.validate_user_input(user_input)
             user_input = input_validation["input"]
 
-            logger.info(f"Processing query - Role: {self.role}, Input length: {len(user_input)}")
+            logger.info(f"Processing query - Role: {self.role}, Input length: {len(user_input)}, "
+                       f"Guardrails: enabled (agent-level middleware)")
 
             # Add to memory for context tracking
             self.memory.add_message("user", user_input, {"role": self.role})
@@ -500,14 +515,11 @@ SAFETY & QUALITY GUARDRAILS:
 
             logger.debug(f"Invoking create_agent with {len(messages)} messages")
 
-            # ===== INVOKE AGENT WITH GUARDRAILS MIDDLEWARE =====
+            # ===== INVOKE AGENT WITH GUARDRAILS MIDDLEWARE (ALREADY BOUND AT CREATION) =====
             try:
-                # Include guardrails callback handler during invocation
-                guardrails_handler = GuardrailsCallbackHandler()
-                result = self.agent.invoke(
-                    {"messages": messages},
-                    config={"callbacks": [guardrails_handler]}
-                )
+                # Agent is created with guardrails callbacks already bound
+                # No need to pass callbacks here - they're part of agent configuration
+                result = self.agent_with_guardrails.invoke({"messages": messages})
                 logger.debug(f"Agent invocation succeeded - Result type: {type(result)}")
             except Exception as e:
                 logger.error(f"Agent invocation failed: {str(e)}")
