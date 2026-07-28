@@ -345,69 +345,16 @@ if run_button and user_input.strip():
                     approved_result["ticket_created"] = True
                     approved_result["ticket_id"] = ticket_result["ticket_id"]
 
+                    # Store in session state for display
+                    st.session_state.approved_fault_result = {
+                        "result": approved_result,
+                        "ticket_result": ticket_result
+                    }
                     # Store in history
                     st.session_state.fault_workflows.insert(0, st.session_state.pending_fault_approval)
                     st.session_state.pending_fault_approval = None
 
-                    # Display success immediately
-                    st.balloons()
-                    st.success("✅ Ticket Successfully Created!")
-
-                    fault = approved_result.get("fault_analysis", {})
-                    diagnosis = approved_result.get("diagnosis", {})
-
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Status", "✅ Created")
-                    with col2:
-                        st.metric("Ticket ID", ticket_result["ticket_id"])
-                    with col3:
-                        severity = diagnosis.get("severity", "unknown")
-                        st.metric("Severity", severity.upper())
-
-                    st.divider()
-                    st.subheader("Ticket Details")
-
-                    ticket_data = {
-                        "ticket_id": ticket_result["ticket_id"],
-                        "machine_id": fault.get("machine_id"),
-                        "error_code": fault.get("error_code"),
-                        "severity": diagnosis.get("severity"),
-                        "description": diagnosis.get("recommended_action"),
-                        "status": "OPEN",
-                        "created_at": datetime.now().isoformat()
-                    }
-
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write("**Ticket Data:**")
-                        st.json(ticket_data, expanded=False)
-
-                    with col2:
-                        st.write("**Machine & Error Info:**")
-                        info = {
-                            "machine": fault.get("machine_id"),
-                            "error_code": fault.get("error_code"),
-                            "root_cause": diagnosis.get("root_cause"),
-                            "recommended_action": diagnosis.get("recommended_action")
-                        }
-                        st.json(info, expanded=False)
-
-                    st.divider()
-                    st.subheader("✅ Ticket Stored")
-                    tickets_path = "c:/StreamLit/data/maintenance_tickets.json"
-                    if os.path.exists(tickets_path):
-                        with open(tickets_path) as f:
-                            tickets = json.load(f)
-                        st.success(f"Ticket {ticket_result['ticket_id']} saved to system")
-                        st.write(f"**Total tickets in system**: {len(tickets)}")
-
-                    st.divider()
-                    if st.button("✅ Start New Workflow"):
-                        st.session_state.pending_fault_approval = None
-                        st.session_state.approved_fault_result = None
-                        st.rerun()
-
+                    st.rerun()
                 else:
                     st.error(f"Failed to create ticket: {ticket_result.get('error', 'Unknown error')}")
 
@@ -416,6 +363,71 @@ if run_button and user_input.strip():
                 st.info("Action cancelled by user")
                 st.session_state.pending_fault_approval = None
                 st.rerun()
+
+# ============================================================================
+# SHOW SUCCESS PAGE IF TICKET WAS APPROVED
+# ============================================================================
+
+if st.session_state.approved_fault_result:
+    st.balloons()
+    st.success("✅ Ticket Successfully Created!")
+
+    approved = st.session_state.approved_fault_result["result"]
+    ticket_result = st.session_state.approved_fault_result["ticket_result"]
+
+    fault = approved.get("fault_analysis", {})
+    diagnosis = approved.get("diagnosis", {})
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Status", "✅ Created")
+    with col2:
+        st.metric("Ticket ID", ticket_result["ticket_id"])
+    with col3:
+        severity = diagnosis.get("severity", "unknown")
+        st.metric("Severity", severity.upper())
+
+    st.divider()
+    st.subheader("Ticket Details")
+
+    ticket_data = {
+        "ticket_id": ticket_result["ticket_id"],
+        "machine_id": fault.get("machine_id"),
+        "error_code": fault.get("error_code"),
+        "severity": diagnosis.get("severity"),
+        "description": diagnosis.get("recommended_action"),
+        "status": "OPEN",
+        "created_at": datetime.now().isoformat()
+    }
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("**Ticket Data:**")
+        st.json(ticket_data, expanded=False)
+
+    with col2:
+        st.write("**Machine & Error Info:**")
+        info = {
+            "machine": fault.get("machine_id"),
+            "error_code": fault.get("error_code"),
+            "root_cause": diagnosis.get("root_cause"),
+            "recommended_action": diagnosis.get("recommended_action")
+        }
+        st.json(info, expanded=False)
+
+    st.divider()
+    st.subheader("✅ Ticket Stored")
+    tickets_path = "c:/StreamLit/data/maintenance_tickets.json"
+    if os.path.exists(tickets_path):
+        with open(tickets_path) as f:
+            tickets = json.load(f)
+        st.success(f"Ticket {ticket_result['ticket_id']} saved to system")
+        st.write(f"**Total tickets in system**: {len(tickets)}")
+
+    st.divider()
+    if st.button("✅ Start New Workflow"):
+        st.session_state.approved_fault_result = None
+        st.rerun()
 
 # ============================================================================
 # HISTORY: Previous Workflows
