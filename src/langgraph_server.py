@@ -80,11 +80,6 @@ app.add_middleware(
 # ROOT ENDPOINT (for LangGraph Studio compatibility)
 # ============================================================================
 
-@app.options("/{full_path:path}")
-async def preflight_handler(full_path: str):
-    """Handle CORS preflight requests."""
-    return JSONResponse({"ok": True})
-
 @app.get("/")
 async def root():
     """Root endpoint for LangGraph Studio."""
@@ -118,6 +113,51 @@ async def health_check():
 # ============================================================================
 # WORKFLOW EXECUTION ENDPOINT
 # ============================================================================
+
+@app.api_route("/threads/{thread_id}/runs/stream", methods=["POST", "GET", "OPTIONS"])
+async def stream_run(thread_id: str, req: Request):
+    """Stream run output (LangGraph Studio compatible execution)."""
+    import uuid
+    from langchain_core.messages import HumanMessage
+
+    try:
+        body = await req.json()
+    except:
+        body = {}
+
+    user_input = body.get("input", "")
+    if isinstance(user_input, dict):
+        user_input = user_input.get("text", str(user_input))
+
+    if not user_input:
+        return JSONResponse({"error": "Missing input"}, status_code=400)
+
+    try:
+        initial_input = {
+            "user_input": str(user_input),
+            "messages": [HumanMessage(content=str(user_input))]
+        }
+
+        # Execute with streaming
+        result = workflow_graph.invoke(initial_input)
+
+        return JSONResponse({
+            "run_id": str(uuid.uuid4()),
+            "status": "completed",
+            "output": {
+                "user_input": result.get("user_input"),
+                "fault_analysis": result.get("fault_analysis"),
+                "diagnosis": result.get("diagnosis"),
+                "awaiting_approval": result.get("awaiting_approval"),
+                "ticket_created": result.get("ticket_created")
+            }
+        })
+    except Exception as e:
+        logger.error(f"Stream execution failed: {e}")
+        return JSONResponse(
+            {"status": "error", "error": str(e)},
+            status_code=500
+        )
 
 @app.post("/invoke")
 async def invoke_workflow(data: dict):
@@ -389,51 +429,76 @@ async def get_assistant_schemas(assistant_id: str):
 @app.get("/assistants/{assistant_id}/graph")
 async def get_assistant_graph(assistant_id: str):
     """Get graph topology for visualization (LangGraph Studio)."""
+    try:
+        # Get the actual graph from compiled workflow
+        graph = workflow_graph.get_graph()
+
+        # Extract node and edge information
+        nodes = []
+        edges = []
+
+        # Get graph structure
+        if hasattr(graph, 'nodes'):
+            for node_id, node in graph.nodes.items():
+                nodes.append({
+                    "id": str(node_id),
+                    "label": str(node_id).replace("_", " ").title(),
+                    "type": "agent"
+                })
+
+        if hasattr(graph, 'edges'):
+            for source, target in graph.edges:
+                edges.append({
+                    "source": str(source),
+                    "target": str(target)
+                })
+
+        # If we got nodes, return the graph structure
+        if nodes:
+            return JSONResponse({
+                "id": "level3_workflow",
+                "name": "Level 3 Workflow",
+                "description": "Multi-Agent Fault Handling Workflow",
+                "nodes": nodes,
+                "edges": edges
+            })
+    except Exception as e:
+        logger.warning(f"Could not extract graph schema: {e}")
+
+    # Fallback to manual structure if extraction fails
     return JSONResponse({
         "id": "level3_workflow",
         "name": "Level 3 Workflow",
         "description": "Multi-Agent Fault Handling Workflow",
-        "type": "compiled_state_graph",
         "nodes": [
-            {
-                "id": "fault_analysis",
-                "label": "Fault Analysis Agent",
-                "type": "agent",
-                "position": {"x": 0, "y": 0},
-                "description": "Extract machine_id and error_code"
-            },
-            {
-                "id": "diagnosis",
-                "label": "Diagnosis Agent",
-                "type": "agent",
-                "position": {"x": 400, "y": 0},
-                "description": "Lookup machine specs and error info"
-            },
-            {
-                "id": "request",
-                "label": "Request Agent",
-                "type": "agent",
-                "position": {"x": 800, "y": 0},
-                "description": "Present recommendation and request approval"
-            }
+            {"id": "fault_analysis", "label": "Fault Analysis Agent", "type": "agent"},
+            {"id": "diagnosis", "label": "Diagnosis Agent", "type": "agent"},
+            {"id": "request", "label": "Request Agent", "type": "agent"}
         ],
         "edges": [
-            {
-                "source": "fault_analysis",
-                "target": "diagnosis",
-                "label": "fault_analysis output",
-                "type": "transition"
-            },
-            {
-                "source": "diagnosis",
-                "target": "request",
-                "label": "diagnosis output",
-                "type": "transition"
-            }
-        ],
-        "entry_point": "fault_analysis",
-        "exit_point": "request"
+            {"source": "fault_analysis", "target": "diagnosis"},
+            {"source": "diagnosis", "target": "request"}
+        ]
     })
+
+@app.get("/graph/mermaid")
+async def get_graph_mermaid():
+    """Get Mermaid diagram of the workflow (for visualization)."""
+    try:
+        graph = workflow_graph.get_graph()
+        mermaid_str = graph.draw_mermaid()
+        return JSONResponse({
+            "format": "mermaid",
+            "diagram": mermaid_str,
+            "description": "Multi-agent workflow: fault_analysis → diagnosis → request"
+        })
+    except Exception as e:
+        logger.warning(f"Could not generate mermaid: {e}")
+        return JSONResponse({
+            "format": "mermaid",
+            "diagram": "graph LR\n  A[Fault Analysis] --> B[Diagnosis]\n  B --> C[Request]\n",
+            "description": "Fallback diagram"
+        })
 
 @app.get("/graphs")
 async def get_graphs():
@@ -484,6 +549,15 @@ async def get_graphs():
     })
 
 # ============================================================================
+# CATCH-ALL CORS PREFLIGHT (MUST BE LAST - after all specific routes)
+# ============================================================================
+
+@app.api_route("/{full_path:path}", methods=["OPTIONS"])
+async def preflight_handler(full_path: str):
+    """Handle CORS preflight requests - catch-all for undefined routes."""
+    return JSONResponse({"ok": True})
+
+# ============================================================================
 # STARTUP/SHUTDOWN EVENTS
 # ============================================================================
 
@@ -502,7 +576,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 8080
+    port = 9000  # Changed from 8080 due to socket binding issues
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
