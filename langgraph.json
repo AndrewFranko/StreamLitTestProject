@@ -1,0 +1,13 @@
+{
+  "graphs": {
+    "level3_workflow": {
+      "entry": "src.level3_multi_agent_workflow_v2:build_langgraph_workflow"
+    }
+  },
+  "dependencies": [
+    "langchain-core",
+    "langchain-google-genai",
+    "langgraph"
+  ],
+  "env": ".env"
+}
