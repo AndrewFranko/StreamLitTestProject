@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    from fastapi import FastAPI
+    from fastapi import FastAPI, Request
     from fastapi.responses import JSONResponse
     from fastapi.middleware.cors import CORSMiddleware
     import uvicorn
@@ -219,10 +219,16 @@ async def list_threads():
     return JSONResponse([])
 
 @app.post("/assistants/search")
-async def search_assistants(data: dict = None):
-    """Search assistants - the correct endpoint LangGraph Studio uses."""
+async def search_assistants(req: Request):
+    """Search assistants - accepts any request format including empty body."""
     import uuid
     from datetime import datetime
+
+    # Try to parse body, but accept empty
+    try:
+        body = await req.json()
+    except:
+        body = {}
 
     assistants = [{
         "assistant_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, "level3_workflow")),
