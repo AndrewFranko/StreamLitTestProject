@@ -10,17 +10,37 @@ from typing import Optional, Dict, List, Any
 import json
 
 # Load Streamlit Cloud secrets - THIS MUST BE FIRST
-try:
-    os.environ["GOOGLE_API_KEY"] = st.secrets["tool"]["factoryops"]["gemini"]["GOOGLE_API_KEY"]
-except (KeyError, TypeError):
-    st.error("Missing GOOGLE_API_KEY! Please add it to your Streamlit Cloud Secrets under [tool.factoryops.gemini]")
+# Debug: Show what secrets are available
+if hasattr(st, 'secrets') and st.secrets:
+    # Try flat keys first (simpler for Streamlit Cloud)
+    if "GOOGLE_API_KEY" in st.secrets:
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+    # Try nested structure
+    elif "tool" in st.secrets and "factoryops" in st.secrets["tool"]:
+        if "gemini" in st.secrets["tool"]["factoryops"]:
+            os.environ["GOOGLE_API_KEY"] = st.secrets["tool"]["factoryops"]["gemini"]["GOOGLE_API_KEY"]
+        elif "GOOGLE_API_KEY" in st.secrets["tool"]["factoryops"]:
+            os.environ["GOOGLE_API_KEY"] = st.secrets["tool"]["factoryops"]["GOOGLE_API_KEY"]
+
+# Check if GOOGLE_API_KEY is set
+if "GOOGLE_API_KEY" not in os.environ or not os.environ["GOOGLE_API_KEY"]:
+    st.error("""
+    Missing GOOGLE_API_KEY!
+
+    **Streamlit Cloud Setup:**
+    1. Go to App Settings → Secrets
+    2. Add as TOML:
+    ```
+    GOOGLE_API_KEY = "your-actual-key"
+    LANGSMITH_API_KEY = "optional-key"
+    ```
+    3. Save and redeploy
+    """)
     st.stop()
 
 # Load optional LangSmith secrets
-try:
-    os.environ["LANGSMITH_API_KEY"] = st.secrets["tool"]["factoryops"]["langsmith"]["LANGSMITH_API_KEY"]
-except (KeyError, TypeError):
-    pass  # Optional, so just skip if not available
+if "LANGSMITH_API_KEY" in st.secrets:
+    os.environ["LANGSMITH_API_KEY"] = st.secrets["LANGSMITH_API_KEY"]
 
 # Page configuration
 st.set_page_config(
