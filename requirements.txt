@@ -1,34 +1,22 @@
 # FactoryOps AI Level 2 - Single Agent with Tool Calling
 # Python 3.10+
-# Generated from pip freeze - actual working versions
+# Streamlit Cloud compatible versions
 
 # Core LLM & LangChain
-langchain==1.3.14
-langchain-core==1.5.1
-langchain-google-genai==4.3.2
-google-generativeai==0.8.6
-google-genai==2.14.0
+langchain==0.3.6
+langchain-google-genai==1.0.6
+google-generativeai==0.5.4
 
 # Streamlit Web UI
-streamlit==1.60.0
+streamlit==1.39.0
 
 # Configuration Management
 python-dotenv==1.1.0
-pydantic==2.13.4
-pydantic-settings==2.14.2
-pydantic-core==2.46.4
+pydantic==2.7.4
+pydantic-settings==2.2.1
 
 # Data & API
-requests==2.34.2
-requests-toolbelt==1.0.0
-
-# Google APIs
-google-auth==2.56.2
-google-api-core==2.33.0
-google-api-python-client==2.198.0
-google-auth-httplib2==0.4.0
-googleapis-common-protos==1.75.0
-google-ai-generativelanguage==0.6.15
+requests==2.32.3
 
 # Testing (optional)
 pytest==7.4.4
@@ -38,3 +26,6 @@ pytest-asyncio==0.23.3
 black==24.3.0
 isort==5.13.2
 flake8==7.0.0
+
+# Protobuf constraint to avoid conflicts
+protobuf>=5.29.6,<6.0.0
