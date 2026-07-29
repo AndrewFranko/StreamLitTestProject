@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # LLM Configuration
-    model_name: str = "gemini-1.5-flash"
+    model_name: str = "gemini-3.1-flash-lite"
     temperature: float = 0.7
     max_tokens: int = 2048
 

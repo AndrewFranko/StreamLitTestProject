@@ -11,7 +11,7 @@ setup_secrets()
 
 # Now use your secrets
 from langchain_google_genai import ChatGoogleGenerativeAI
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
+llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
 ```
 """
 
