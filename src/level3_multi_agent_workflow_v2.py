@@ -24,10 +24,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Setup LangSmith tracing
+LANGSMITH_ENABLED = False
 try:
-    from src.langsmith_config import LANGSMITH_ENABLED
+    from langsmith_config import LANGSMITH_ENABLED
 except ImportError:
-    LANGSMITH_ENABLED = False
+    try:
+        from src.langsmith_config import LANGSMITH_ENABLED
+    except ImportError:
+        LANGSMITH_ENABLED = False
 
 # LangGraph imports
 try:

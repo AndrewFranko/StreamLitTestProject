@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Import RAG pipeline
 try:
-    from src.rag_pipeline import find_similar_tickets, refresh_rag_pipeline
+    from rag_pipeline import find_similar_tickets, refresh_rag_pipeline
     RAG_AVAILABLE = True
 except ImportError:
     RAG_AVAILABLE = False

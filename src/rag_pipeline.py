@@ -18,10 +18,14 @@ from langchain_core.callbacks import tracing_v2_enabled_if_api_key_set
 import logging
 
 # Setup LangSmith tracing
+LANGSMITH_ENABLED = False
 try:
-    from src.langsmith_config import LANGSMITH_ENABLED
+    from langsmith_config import LANGSMITH_ENABLED
 except ImportError:
-    LANGSMITH_ENABLED = False
+    try:
+        from src.langsmith_config import LANGSMITH_ENABLED
+    except ImportError:
+        LANGSMITH_ENABLED = False
 
 logger = logging.getLogger(__name__)
 
