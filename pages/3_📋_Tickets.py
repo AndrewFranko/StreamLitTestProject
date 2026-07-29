@@ -176,7 +176,8 @@ else:
 
                         with col1:
                             st.markdown(f"**🎫 {ticket['ticket_id']}** - {ticket['machine_id']}")
-                            st.write(f"Priority: {ticket['priority'].upper()} | Status: {ticket['status'].upper()}")
+                            priority = ticket.get('priority') or ticket.get('severity', 'unknown')
+                            st.write(f"Priority: {priority.upper()} | Status: {ticket['status'].upper()}")
                             st.write(f"Description: {ticket['description']}")
 
                         with col2:
@@ -236,7 +237,8 @@ else:
                 st.markdown(f"## {selected_ticket['ticket_id']}")
                 st.markdown(f"**Machine:** {selected_ticket['machine_id']}")
                 st.markdown(f"**Status:** {selected_ticket['status'].upper()}")
-                st.markdown(f"**Priority:** {selected_ticket['priority'].upper()}")
+                priority = selected_ticket.get('priority') or selected_ticket.get('severity', 'unknown')
+                st.markdown(f"**Priority:** {priority.upper()}")
 
             with col2:
                 st.markdown("**Timeline**")

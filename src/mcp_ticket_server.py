@@ -194,14 +194,17 @@ def ticket_summary(ticket_id: str) -> str:
     if not ticket:
         return f"Ticket {ticket_id} not found"
 
+    priority = ticket.get('priority') or ticket.get('severity', 'unknown')
+    assigned = ticket.get('assigned_to') or ticket.get('assigned_technician') or 'Unassigned'
+
     return (
         f"**Ticket {ticket['ticket_id']}**\n"
         f"Machine: {ticket['machine_id']}\n"
         f"Status: {ticket['status'].upper()}\n"
-        f"Priority: {ticket['priority'].upper()}\n"
+        f"Priority: {priority.upper()}\n"
         f"Description: {ticket['description']}\n"
         f"Created: {ticket['created_at']}\n"
-        f"Assigned to: {ticket['assigned_to'] or 'Unassigned'}"
+        f"Assigned to: {assigned}"
     )
 
 
