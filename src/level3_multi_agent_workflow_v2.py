@@ -2,7 +2,7 @@
 Level 3: True Multi-Agent Architecture with RELIABLE RunTree Tracing
 
 Uses explicit LangSmith RunTree for synchronous, reliable tracing.
-Each agent uses ChatGoogleGenerativeAI directly (no AgentEngine complexity).
+Each agent uses AgentEngine (pre-configured Gemini wrapper).
 Workflow executes three sequential agents with explicit RunTree wrapping.
 """
 
@@ -26,16 +26,13 @@ except ImportError as e:
 
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
 
-# LangSmith imports
-try:
-    from langsmith import traceable
-    LANGSMITH_AVAILABLE = True
-except ImportError:
-    def traceable(func):
-        return func
-    LANGSMITH_AVAILABLE = False
+# Traceable decorator - skip LangSmith imports to avoid pydantic/LangGraph conflicts
+def traceable(func=None, **kwargs):
+    """Minimal traceable decorator to avoid import issues."""
+    def decorator(f):
+        return f
+    return decorator if func is None else decorator(func)
 
 # ============================================================================
 # STATE DEFINITION
@@ -140,13 +137,15 @@ def fault_analysis_agent(state: WorkflowState) -> WorkflowState:
     AGENT 1: Fault Analysis
 
     Extract machine_id, error_code, request_type from user input.
-    Uses ChatGoogleGenerativeAI directly for maximum reliability.
+    Uses AgentEngine (pre-configured Gemini wrapper).
     """
+    from src.agent_engine import AgentEngine
+
     user_input = state["user_input"]
     logger.info(f"[Agent 1] Fault Analysis starting")
 
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+        agent = AgentEngine('operator')
 
         extraction_prompt = f"""Extract machine fault information from this text:
 "{user_input}"
@@ -159,8 +158,8 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
     "missing_fields": []
 }}"""
 
-        result = llm.invoke(extraction_prompt)
-        response_text = result.content
+        result = agent.process_query(extraction_prompt)
+        response_text = result.get('response', '')
 
         # Parse JSON
         try:
@@ -216,8 +215,10 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
     AGENT 2: Maintenance Diagnosis
 
     Uses fault_analysis data to diagnose issue.
-    Looks up machine and error details, provides analysis.
+    Looks up machine and error details, provides analysis via AgentEngine.
     """
+    from src.agent_engine import AgentEngine
+
     fault_data = state.get("fault_analysis", {})
     machine_id = fault_data.get("machine_id", "UNKNOWN")
     error_code = fault_data.get("error_code", "UNKNOWN")
@@ -225,8 +226,6 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
     logger.info(f"[Agent 2] Diagnosis starting: {machine_id}/{error_code}")
 
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
-
         # Search tools
         machines = load_machines_data()
         machine_details = next((m for m in machines if m.get("id") == machine_id), {"error": "not found"})
@@ -234,7 +233,8 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
         errors = load_error_codes_data()
         error_details = next((e for e in errors if e.get("code") == error_code), {"error": "not found"})
 
-        # Use Gemini for intelligent diagnosis
+        # Use AgentEngine for intelligent diagnosis
+        agent = AgentEngine('engineer')
         diagnosis_prompt = f"""Based on this machine and error data, provide a detailed diagnosis:
 
 Machine: {json.dumps(machine_details, indent=2)}
@@ -251,10 +251,10 @@ Provide your analysis in JSON format:
     "safety_concerns": "any safety issues to note"
 }}"""
 
-        result = llm.invoke(diagnosis_prompt)
-        response_text = result.content
+        result = agent.process_query(diagnosis_prompt)
+        response_text = result.get('response', '')
 
-        # Parse diagnosis from Gemini
+        # Parse diagnosis from AgentEngine
         try:
             import re
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
@@ -265,7 +265,7 @@ Provide your analysis in JSON format:
         except:
             gemini_diagnosis = {}
 
-        # Build diagnosis with Gemini insights
+        # Build diagnosis with AgentEngine insights
         severity = gemini_diagnosis.get("severity", error_details.get("severity", "unknown"))
         root_cause = gemini_diagnosis.get("root_cause", error_details.get("symptom", "Unknown"))
         recommended_action = gemini_diagnosis.get("recommended_action", error_details.get("recommended_action", "Contact supervisor"))
@@ -313,7 +313,10 @@ def request_agent(state: WorkflowState) -> WorkflowState:
     AGENT 3: Maintenance Request
 
     Present recommendation and await human approval.
+    Uses AgentEngine for ticket composition.
     """
+    from src.agent_engine import AgentEngine
+
     diagnosis = state.get("diagnosis", {})
     fault_data = state.get("fault_analysis", {})
 
@@ -325,9 +328,8 @@ def request_agent(state: WorkflowState) -> WorkflowState:
     logger.info(f"[Agent 3] Request Agent: awaiting approval")
 
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
-
-        # Use Gemini to compose professional ticket summary
+        # Use AgentEngine to compose professional ticket summary
+        agent = AgentEngine('supervisor')
         ticket_prompt = f"""Create a professional maintenance ticket summary for approval:
 
 Machine: {machine_id}
@@ -338,8 +340,8 @@ Root Cause: {diagnosis.get('root_cause', 'Unknown')}
 
 Generate a clear, concise ticket description that a technician would understand:"""
 
-        result = llm.invoke(ticket_prompt)
-        ticket_description = result.content
+        result = agent.process_query(ticket_prompt)
+        ticket_description = result.get('response', recommended_action)
 
         messages = state.get("messages", [])
         messages.append(AIMessage(content="Maintenance request ready for approval"))
