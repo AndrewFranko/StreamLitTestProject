@@ -372,6 +372,46 @@ async def stream_run(run_id: str, data: dict):
     """Stream run output (for LangGraph Studio compatibility)."""
     return JSONResponse({"status": "streaming"})
 
+@app.get("/assistants/{assistant_id}/subgraphs")
+async def get_assistant_subgraphs(assistant_id: str, recurse: bool = True):
+    """Get subgraphs for nested visualization (required for Studio)."""
+    return JSONResponse({
+        "subgraphs": [
+            {
+                "id": "fault_analysis",
+                "namespace": ["fault_analysis"],
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "machine_id": {"type": "string"},
+                        "error_code": {"type": "string"}
+                    }
+                }
+            },
+            {
+                "id": "diagnosis",
+                "namespace": ["diagnosis"],
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "severity": {"type": "string"},
+                        "recommended_action": {"type": "string"}
+                    }
+                }
+            },
+            {
+                "id": "request",
+                "namespace": ["request"],
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "awaiting_approval": {"type": "boolean"}
+                    }
+                }
+            }
+        ]
+    })
+
 @app.get("/assistants/{assistant_id}/schemas")
 async def get_assistant_schemas(assistant_id: str):
     """Get input/output schemas for graph introspection (LangGraph Studio)."""
@@ -425,6 +465,75 @@ async def get_assistant_schemas(assistant_id: str):
             }
         }
     })
+
+@app.get("/assistants/{assistant_id}/nodes/{node_id}")
+async def get_node_schema(assistant_id: str, node_id: str):
+    """Get schema for individual node (required for Studio node inspection)."""
+    node_schemas = {
+        "fault_analysis": {
+            "id": "fault_analysis",
+            "label": "Fault Analysis Agent",
+            "type": "agent",
+            "description": "Extracts machine_id and error_code from user input",
+            "input_schema": {
+                "type": "object",
+                "properties": {"user_input": {"type": "string"}},
+                "required": ["user_input"]
+            },
+            "output_schema": {
+                "type": "object",
+                "properties": {
+                    "machine_id": {"type": "string"},
+                    "error_code": {"type": "string"}
+                }
+            }
+        },
+        "diagnosis": {
+            "id": "diagnosis",
+            "label": "Diagnosis Agent",
+            "type": "agent",
+            "description": "Looks up machine specs and error info",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "machine_id": {"type": "string"},
+                    "error_code": {"type": "string"}
+                }
+            },
+            "output_schema": {
+                "type": "object",
+                "properties": {
+                    "severity": {"type": "string"},
+                    "recommended_action": {"type": "string"}
+                }
+            }
+        },
+        "request": {
+            "id": "request",
+            "label": "Request Agent",
+            "type": "agent",
+            "description": "Presents recommendation and awaits approval",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "diagnosis": {"type": "object"},
+                    "fault_analysis": {"type": "object"}
+                }
+            },
+            "output_schema": {
+                "type": "object",
+                "properties": {
+                    "awaiting_approval": {"type": "boolean"},
+                    "ticket_created": {"type": "boolean"}
+                }
+            }
+        }
+    }
+
+    schema = node_schemas.get(node_id)
+    if schema:
+        return JSONResponse(schema)
+    return JSONResponse({"error": f"Node {node_id} not found"}, status_code=404)
 
 @app.get("/assistants/{assistant_id}/graph")
 async def get_assistant_graph(assistant_id: str):
@@ -549,13 +658,13 @@ async def get_graphs():
     })
 
 # ============================================================================
-# CATCH-ALL CORS PREFLIGHT (MUST BE LAST - after all specific routes)
+# CATCH-ALL CORS PREFLIGHT (DISABLED - was blocking /assistants/* routes)
 # ============================================================================
-
-@app.api_route("/{full_path:path}", methods=["OPTIONS"])
-async def preflight_handler(full_path: str):
-    """Handle CORS preflight requests - catch-all for undefined routes."""
-    return JSONResponse({"ok": True})
+# Commented out because FastAPI CORS middleware handles preflight automatically
+# @app.api_route("/{full_path:path}", methods=["OPTIONS"])
+# async def preflight_handler(full_path: str):
+#     """Handle CORS preflight requests - catch-all for undefined routes."""
+#     return JSONResponse({"ok": True})
 
 # ============================================================================
 # STARTUP/SHUTDOWN EVENTS
@@ -576,7 +685,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 9000  # Changed from 8080 due to socket binding issues
+    port = 5555  # Use 5555 (different from previous attempts)
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
