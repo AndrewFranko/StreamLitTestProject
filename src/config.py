@@ -1,6 +1,9 @@
 """
 Configuration module for FactoryOps AI.
-Loads settings from pyproject.toml and environment variables.
+Loads settings from:
+1. Streamlit Cloud secrets (st.secrets)
+2. pyproject.toml and pyproject.local.toml
+3. Environment variables
 Uses Pydantic BaseSettings for flexible configuration management.
 """
 
@@ -12,6 +15,19 @@ from functools import lru_cache
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def load_streamlit_secrets() -> dict:
+    """Load secrets from Streamlit Cloud secrets.toml via st.secrets."""
+    try:
+        import streamlit as st
+        # st.secrets is available in Streamlit Cloud
+        if hasattr(st, 'secrets') and st.secrets:
+            logger.debug("Loaded secrets from Streamlit Cloud")
+            return dict(st.secrets)
+    except Exception as e:
+        logger.debug(f"Streamlit secrets not available (expected locally): {e}")
+    return {}
 
 
 def load_pyproject_config() -> dict:
@@ -120,13 +136,16 @@ class Settings(BaseSettings):
         extra = "allow"
 
 
-def _merge_pyproject_settings():
+def _merge_all_settings():
     """
-    Merge pyproject.toml config into environment variables for Pydantic to consume.
-    Converts kebab-case to snake_case and flattens nested sections.
-    Only sets env vars if not already set (respects existing env vars).
+    Merge settings from multiple sources into environment variables for Pydantic.
+    Priority: Streamlit secrets > Environment vars > pyproject.local.toml > pyproject.toml
     """
-    config = load_pyproject_config()
+    # 1. Load Streamlit Cloud secrets (highest priority)
+    streamlit_secrets = load_streamlit_secrets()
+
+    # 2. Load TOML configs
+    toml_config = load_pyproject_config()
 
     # Convert kebab-case to snake_case and flatten nested dicts
     def flatten_dict(d, parent_key="", sep="_"):
@@ -143,19 +162,27 @@ def _merge_pyproject_settings():
                 # Don't override existing environment variables
                 if not os.getenv(new_key):
                     os.environ[new_key] = str(v)
-                    logger.debug(f"Set {new_key} from pyproject.toml")
+                    logger.debug(f"Set {new_key} from TOML config")
                 items.append((new_key, v))
         return dict(items)
 
-    if config:
-        flatten_dict(config)
+    # Flatten and merge TOML config
+    if toml_config:
+        flatten_dict(toml_config)
+
+    # Override with Streamlit secrets (if available)
+    for key, value in streamlit_secrets.items():
+        if value is not None:
+            env_key = key.upper().replace("-", "_")
+            os.environ[env_key] = str(value)
+            logger.debug(f"Set {env_key} from Streamlit Cloud secrets")
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """
     Retrieve cached settings instance.
-    Priority: Environment Variables > pyproject.local.toml > pyproject.toml > Defaults
+    Priority: Streamlit secrets > Environment Variables > pyproject.local.toml > pyproject.toml > Defaults
 
     Returns:
         Settings: Application configuration object
@@ -164,7 +191,7 @@ def get_settings() -> Settings:
         ValueError: If GOOGLE_API_KEY is not set
     """
     try:
-        _merge_pyproject_settings()
+        _merge_all_settings()
         settings = Settings()
 
         if not settings.google_api_key:
@@ -182,7 +209,8 @@ def get_settings() -> Settings:
         logger.debug(
             f"  Database: {settings.database_url}\n"
             f"  LangSmith: {settings.langsmith_project}\n"
-            f"  Data paths: {settings.machines_data_path}"
+            f"  Data paths: {settings.machines_data_path}\n"
+            f"  Using Streamlit Cloud secrets: {bool(load_streamlit_secrets())}"
         )
         return settings
     except Exception as e:
