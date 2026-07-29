@@ -98,6 +98,11 @@ async def root():
 # HEALTH CHECK
 # ============================================================================
 
+@app.get("/ok")
+async def ok():
+    """LangGraph Studio health check endpoint."""
+    return JSONResponse({"ok": True})
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -197,6 +202,63 @@ async def workflow_info():
     })
 
 # ============================================================================
+# LANGGRAPH API ENDPOINTS (required by LangGraph Studio)
+# ============================================================================
+
+@app.get("/api/runs")
+async def list_runs():
+    """List all runs."""
+    return JSONResponse([])
+
+@app.post("/api/runs")
+async def create_run(data: dict):
+    """Create a new run."""
+    return JSONResponse({
+        "run_id": "run-1",
+        "status": "pending",
+        "created_at": "2026-07-29T10:00:00Z"
+    })
+
+@app.get("/api/threads")
+async def list_threads():
+    """List all threads."""
+    return JSONResponse([])
+
+@app.post("/api/threads")
+async def create_thread(data: dict):
+    """Create a new thread."""
+    return JSONResponse({
+        "thread_id": "thread-1",
+        "created_at": "2026-07-29T10:00:00Z"
+    })
+
+@app.get("/api/assistants")
+async def list_assistants():
+    """List all assistants."""
+    return JSONResponse([{
+        "id": "level3_workflow",
+        "name": "Level 3 Workflow",
+        "description": "Multi-agent fault handling workflow"
+    }])
+
+@app.get("/openapi.json")
+async def openapi():
+    """OpenAPI specification."""
+    return JSONResponse({
+        "openapi": "3.0.0",
+        "info": {
+            "title": "FactoryOps AI Level 3 Workflow",
+            "version": "2.0"
+        },
+        "paths": {
+            "/ok": {"get": {"summary": "Health check"}},
+            "/api/runs": {"get": {"summary": "List runs"}},
+            "/api/threads": {"get": {"summary": "List threads"}},
+            "/api/assistants": {"get": {"summary": "List assistants"}}
+        }
+    })
+
+# ============================================================================
 # LANGGRAPH STUDIO COMPATIBILITY ENDPOINTS
 # ============================================================================
 
@@ -256,7 +318,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 2024
+    port = 3000
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
