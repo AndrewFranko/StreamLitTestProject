@@ -11,10 +11,16 @@ import json
 
 # Load Streamlit Cloud secrets - THIS MUST BE FIRST
 try:
-    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-except KeyError:
-    st.error("Missing GOOGLE_API_KEY! Please add it to your Streamlit Cloud Secrets.")
+    os.environ["GOOGLE_API_KEY"] = st.secrets["tool"]["factoryops"]["gemini"]["GOOGLE_API_KEY"]
+except (KeyError, TypeError):
+    st.error("Missing GOOGLE_API_KEY! Please add it to your Streamlit Cloud Secrets under [tool.factoryops.gemini]")
     st.stop()
+
+# Load optional LangSmith secrets
+try:
+    os.environ["LANGSMITH_API_KEY"] = st.secrets["tool"]["factoryops"]["langsmith"]["LANGSMITH_API_KEY"]
+except (KeyError, TypeError):
+    pass  # Optional, so just skip if not available
 
 # Page configuration
 st.set_page_config(
