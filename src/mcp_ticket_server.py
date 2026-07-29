@@ -268,14 +268,18 @@ def get_ticket_stats() -> Dict[str, Any]:
 
 def format_ticket_for_display(ticket: Dict[str, Any]) -> str:
     """Format a single ticket for display."""
+    # Handle both 'priority' and 'severity' fields
+    priority = ticket.get('priority') or ticket.get('severity', 'unknown')
+    assigned = ticket.get('assigned_to') or ticket.get('assigned_technician') or 'Unassigned'
+
     return (
         f"🎫 **{ticket['ticket_id']}** | "
         f"Machine: {ticket['machine_id']} | "
         f"Status: {ticket['status'].upper()} | "
-        f"Priority: {ticket['priority'].upper()}\n"
+        f"Priority: {priority.upper()}\n"
         f"   Description: {ticket['description'][:80]}...\n"
         f"   Created: {ticket['created_at'][:10]} | "
-        f"   Assigned: {ticket['assigned_to'] or 'Unassigned'}"
+        f"   Assigned: {assigned}"
     )
 
 
