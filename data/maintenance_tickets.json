@@ -351,5 +351,27 @@
     "status": "open",
     "created_at": "2026-07-29T12:54:49.810485",
     "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729125850",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Perform a visual inspection of all external hydraulic hoses and fittings for leaks. Use a pressure gauge to test pump output pressure. If external lines are sound, proceed to inspect the main cylinder seals for bypass leakage.",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-29T12:58:50.535688",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729130041",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "1. Perform an immediate lockout/tagout procedure. 2. Conduct a visual inspection of all hydraulic lines and fittings for leaks. 3. Perform a pressure drop test on the main cylinder to confirm internal bypass. 4. Inspect and replace cylinder seals if internal leakage is confirmed.",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-29T13:00:41.803884",
+    "assigned_technician": null
   }
 ]

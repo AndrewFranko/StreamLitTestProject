@@ -433,6 +433,15 @@ def execute_workflow(user_input: str, config: dict = None) -> dict:
             # CRITICAL: Post the run to LangSmith (SYNCHRONOUS and RELIABLE)
             root_run.post()
             logger.info("[Workflow] ✓ RunTree posted to LangSmith (synchronous)")
+            logger.info("")
+            logger.info("=" * 60)
+            logger.info("✓✓✓ WORKFLOW INTERACTION COMPLETED SUCCESSFULLY ✓✓✓")
+            logger.info("=" * 60)
+            logger.info(f"Timestamp: {datetime.now().isoformat()}")
+            logger.info(f"Trace ID: {root_run.id}")
+            logger.info("Status: All agents executed, traces submitted to LangSmith")
+            logger.info("=" * 60)
+            logger.info("")
 
     except ImportError:
         logger.warning("[Workflow] RunTree not available, executing without explicit tracing")
