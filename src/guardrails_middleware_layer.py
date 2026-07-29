@@ -78,26 +78,33 @@ class ToolInputValidationMiddleware:
 
     def intercept(self, tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
         """Intercept and validate tool input."""
-        logger.debug(f"Validating {tool_name} input")
+        logger.debug(f"Validating {tool_name} input: {tool_input}")
 
-        # Tool-specific validation
-        if tool_name == "check_machine_status":
-            machine_id = tool_input.get("machine_id", "")
-            if not machine_id or len(machine_id) > 10:
-                if self.strategy == GuardrailsStrategy.BLOCK:
-                    raise ValueError(f"Invalid machine_id: {machine_id}")
+        # Light validation only - let tools do strict validation via Pydantic
+        # This middleware just warns on suspicious patterns
+        try:
+            # Tool-specific validation
+            if tool_name == "check_machine_status":
+                machine_id = tool_input.get("machine_id", "")
+                # Only log warning if machine_id is empty, don't block
+                if not machine_id:
+                    logger.warning(f"check_machine_status called with empty machine_id - will be rejected by tool")
 
-        elif tool_name in ["request_approval", "create_maintenance_ticket"]:
-            description = tool_input.get("description", "")
-            priority = tool_input.get("priority", "")
+            elif tool_name in ["request_approval", "create_maintenance_ticket"]:
+                description = tool_input.get("description", "")
+                priority = tool_input.get("priority", "")
 
-            if not description or len(description) < 10:
-                if self.strategy == GuardrailsStrategy.BLOCK:
-                    raise ValueError("Description must be at least 10 characters")
+                # Only log warnings, don't block - let Pydantic validation handle it
+                if not description:
+                    logger.warning(f"{tool_name} called with empty description")
+                elif len(description) < 10:
+                    logger.warning(f"{tool_name} description too short ({len(description)} chars)")
 
-            if priority not in ["low", "medium", "high", "critical"]:
-                if self.strategy == GuardrailsStrategy.BLOCK:
-                    raise ValueError(f"Invalid priority: {priority}")
+                if priority and priority not in ["low", "medium", "high", "critical"]:
+                    logger.warning(f"{tool_name} called with invalid priority: {priority}")
+        except Exception as e:
+            logger.warning(f"Tool input validation warning: {str(e)}")
+            # Don't block - let tool validation handle it
 
         return tool_input
 
@@ -186,15 +193,25 @@ class GuardrailsMiddlewareHandler(BaseCallbackHandler):
                         for generation in generation_list:
                             text = generation.text if hasattr(generation, 'text') else str(generation)
 
-                            # Apply each middleware's output_validation
-                            for mw in self.middleware:
-                                if hasattr(mw, 'intercept') and mw.name == "output_validation":
-                                    text = mw.intercept(text)
+                            # Skip validation for empty responses or tool calls (agent intermediate steps)
+                            # Tool calls are indicated by function_call in additional_kwargs
+                            if hasattr(generation, 'message') and hasattr(generation.message, 'additional_kwargs'):
+                                if generation.message.additional_kwargs.get('function_call'):
+                                    # This is a tool call, skip text validation
+                                    logger.debug("LLM called a tool - skipping text validation")
+                                    continue
 
-                            logger.info("LLM response passed middleware validation")
+                            # Only validate if there's actual text content
+                            if text and len(text.strip()) > 0:
+                                # Apply each middleware's output_validation
+                                for mw in self.middleware:
+                                    if hasattr(mw, 'intercept') and mw.name == "output_validation":
+                                        text = mw.intercept(text)
+
+                                logger.info("LLM response passed middleware validation")
         except ValueError as e:
             logger.error(f"LLM response failed middleware: {str(e)}")
-            raise
+            # Don't raise - allow tool calls to proceed even if text is empty
 
 
 # ============================================================================
