@@ -11,7 +11,7 @@ streamlit==1.35.0
 
 # Configuration Management
 python-dotenv==1.1.0
-pydantic==2.7.1
+pydantic==2.7.4
 pydantic-settings==2.2.1
 
 # Data & API
