@@ -218,9 +218,34 @@ async def list_threads():
     """List all threads."""
     return JSONResponse([])
 
+@app.post("/assistants/search")
+async def search_assistants(data: dict = None):
+    """Search assistants - the correct endpoint LangGraph Studio uses."""
+    import uuid
+    from datetime import datetime
+
+    assistants = [{
+        "assistant_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, "level3_workflow")),
+        "graph_id": "level3_workflow",
+        "name": "Level 3 Multi-Agent Workflow",
+        "description": "Fault Analysis -> Diagnosis -> Request",
+        "context": {
+            "agents": 3,
+            "flow": "sequential"
+        },
+        "metadata": {
+            "type": "multi_agent",
+            "nodes": ["fault_analysis", "diagnosis", "request"]
+        },
+        "created_at": datetime.utcnow().isoformat() + "+00:00",
+        "updated_at": datetime.utcnow().isoformat() + "+00:00"
+    }]
+
+    return JSONResponse(assistants)
+
 @app.api_route("/api/assistants", methods=["GET", "POST", "OPTIONS"])
 async def list_assistants():
-    """List all assistants in LangGraph format."""
+    """List all assistants in LangGraph format (legacy)."""
     import uuid
     from datetime import datetime
 
@@ -355,7 +380,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 5000
+    port = 8080
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
