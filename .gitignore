@@ -149,6 +149,7 @@ activemq-data/
 
 # Environments
 .env
+.env.local
 .envrc
 .venv
 env/
@@ -156,6 +157,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Local configuration with secrets - DO NOT COMMIT
+pyproject.local.toml
 
 # Spyder project settings
 .spyderproject

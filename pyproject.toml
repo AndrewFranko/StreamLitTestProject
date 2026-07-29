@@ -1,0 +1,146 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "factoryops-ai"
+version = "0.1.0"
+description = "AI-powered Manufacturing Assistant for FactoryOps"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "GlobalLogic Engineering Team", email = "engineering@globallogic.com"}
+]
+keywords = ["manufacturing", "ai", "langchain", "streamlit", "gemini"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "langchain==1.3.14",
+    "langchain-core==1.5.1",
+    "langchain-google-genai==4.3.2",
+    "google-generativeai==0.8.6",
+    "google-genai==2.14.0",
+    "streamlit==1.60.0",
+    "python-dotenv==1.1.0",
+    "pydantic==2.13.4",
+    "pydantic-settings==2.14.2",
+    "requests==2.34.2",
+    "requests-toolbelt==1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.20.0",
+    "black>=24.0.0",
+    "isort>=5.0.0",
+    "flake8>=7.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/globallogic/factoryops-ai"
+Documentation = "https://github.com/globallogic/factoryops-ai#readme"
+Repository = "https://github.com/globallogic/factoryops-ai.git"
+Issues = "https://github.com/globallogic/factoryops-ai/issues"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+known_first_party = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+asyncio_mode = "auto"
+addopts = "-v --strict-markers"
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203", "W503"]
+exclude = [".git", ".venv", "venv", "build", "dist"]
+
+# Application Configuration (defaults only - no secrets)
+# For secrets, create pyproject.local.toml (gitignored) with your API keys
+
+[tool.factoryops.api]
+# Gemini API Configuration - Set via environment variable or pyproject.local.toml
+google-api-key = ""
+timeout-seconds = 30
+max-retries = 3
+
+[tool.factoryops.app]
+name = "FactoryOps AI"
+env = "development"  # development, staging, production
+log-level = "INFO"
+
+[tool.factoryops.llm]
+model-name = "gemini-1.5-flash"
+temperature = 0.7
+max-tokens = 2048
+
+[tool.factoryops.memory]
+max-conversation-length = 100
+conversation-buffer-type = "buffer"
+
+[tool.factoryops.agent]
+max-iterations = 10
+timeout-seconds = 30.0
+
+[tool.factoryops.data]
+machines-data-path = "src/data/machines.json"
+error-codes-data-path = "src/data/error_codes.json"
+technicians-data-path = "src/data/technicians.json"
+tickets-data-path = "src/data/maintenance_tickets.json"
+
+[tool.factoryops.security]
+session-timeout-minutes = 30
+
+[tool.factoryops.integrations]
+mes-api-url = "http://mes-internal.factoryops.com/api"
+maintenance-api-url = "http://maintenance.factoryops.com/api"
+inventory-api-url = "http://inventory.factoryops.com/api"
+
+[tool.factoryops.database]
+url = "sqlite:///./data/factory_ops.db"
+
+[tool.factoryops.monitoring]
+enable-logging = true
+log-file = "logs/factoryops.log"
+
+[tool.factoryops.langsmith]
+api-key = ""  # Set via environment variable or pyproject.local.toml
+project = "Factory"
+endpoint = "https://eu.api.smith.langchain.com"
+batch-timeout-ms = 100
+timeout-ms = 10000
+tracing-v2 = true
+tracing = true
+callbacks-background = false
