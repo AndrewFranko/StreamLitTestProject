@@ -75,6 +75,19 @@ app.add_middleware(
 )
 
 # ============================================================================
+# ROOT ENDPOINT (for LangGraph Studio compatibility)
+# ============================================================================
+
+@app.get("/")
+async def root():
+    """Root endpoint for LangGraph Studio."""
+    return JSONResponse({
+        "status": "ok",
+        "server": "LangGraph Agent Server",
+        "version": "2.0"
+    })
+
+# ============================================================================
 # HEALTH CHECK
 # ============================================================================
 
@@ -92,7 +105,7 @@ async def health_check():
 # ============================================================================
 
 @app.post("/invoke")
-async def invoke_workflow(request: dict):
+async def invoke_workflow(data: dict):
     """
     Execute the workflow.
 
@@ -108,7 +121,7 @@ async def invoke_workflow(request: dict):
     }
     """
     try:
-        user_input = request.get("input", "")
+        user_input = data.get("input", "") if data else ""
 
         if not user_input:
             return JSONResponse({"error": "Missing 'input' field"}, status_code=400)
@@ -236,7 +249,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 7777
+    port = 2024
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
