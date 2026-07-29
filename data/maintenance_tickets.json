@@ -373,5 +373,16 @@
     "status": "open",
     "created_at": "2026-07-29T13:00:41.803884",
     "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729130740",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Perform a lockout/tagout procedure. Inspect hydraulic lines for external leaks. Verify pump output pressure with a calibrated gauge. If pump pressure is within spec, proceed to inspect the main cylinder seals for bypass leakage.",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-29T13:07:40.501461",
+    "assigned_technician": null
   }
 ]

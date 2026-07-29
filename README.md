@@ -140,7 +140,7 @@ factoryops-ai/
 
 ```ini
 # Required
-GOOGLE_API_KEY=sk-...your-actual-key...
+GOOGLE_API_KEY=your_gemini_api_key_here
 
 # Optional (defaults provided)
 APP_ENV=development              # development, staging, production
