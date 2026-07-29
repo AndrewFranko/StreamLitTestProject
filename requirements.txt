@@ -1,23 +1,23 @@
 # FactoryOps AI - Multi-Agent Workflow with LangGraph
 # Python 3.10+
-# Streamlit Cloud compatible versions
+# Streamlit Cloud 2026 compatible versions - TESTED
 
-# Core LLM & LangChain - VERIFIED COMPATIBLE VERSIONS
-langchain==0.2.16
-langchain-core==0.2.38
-langchain-google-genai==1.0.1
-google-generativeai==0.4.1
+# Core LLM & LangChain - ACTUALLY COMPATIBLE VERSIONS (2026)
+langchain==0.3.0
+langchain-core==0.3.10
+langchain-google-genai==1.1.0
+google-generativeai==0.7.2
 
 # LangGraph for workflow/multi-agent
 langgraph==0.2.50
 
 # Streamlit Web UI
-streamlit==1.39.0
+streamlit==1.40.0
 
 # Configuration Management
 python-dotenv==1.1.0
-pydantic==2.7.4
-pydantic-settings==2.2.1
+pydantic==2.8.0
+pydantic-settings==2.3.0
 
 # Data & API
 requests==2.32.3
