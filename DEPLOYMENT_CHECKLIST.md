@@ -20,7 +20,7 @@
 - [OK] `run.sh` - Unix/Mac startup script
 
 ### 2. Environment Configuration
-- [OK] GOOGLE_API_KEY: `your_gcp_api_key_here`
+- [OK] GOOGLE_API_KEY: configured in `.env` (not shown for security)
 - [OK] APP_ENV: `development`
 - [OK] Path resolution fixed in `src/ui/app.py`
 
@@ -216,7 +216,7 @@ The script will:
 ### Issue: "GOOGLE_API_KEY not set"
 **Solution:**
 1. Verify .env file exists: `cat .env` (Linux/Mac) or `type .env` (Windows)
-2. Check key value is correct: `your_gcp_api_key_here`
+2. Check key value is set (compare with .env.example format)
 3. Restart Streamlit after fixing .env
 
 ### Issue: "FileNotFoundError: machines.json not found"

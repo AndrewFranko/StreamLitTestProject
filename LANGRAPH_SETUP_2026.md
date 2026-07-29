@@ -267,11 +267,13 @@ Open `http://localhost:8501` in browser and navigate to:
 
 ### **Environment Variables**
 ```ini
-LANGSMITH_API_KEY=your_langsmith_key_here
+LANGSMITH_API_KEY=your_langsmith_api_key_here
 LANGSMITH_PROJECT=Factory
 LANGCHAIN_TRACING_V2=true
 LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
 ```
+
+Note: Get your LangSmith API key from https://smith.langchain.com
 
 ---
 
