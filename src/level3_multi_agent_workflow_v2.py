@@ -57,74 +57,6 @@ class WorkflowState(TypedDict):
     error: str
 
 
-# ============================================================================
-# DATA SOURCES
-# ============================================================================
-
-def load_machines_data() -> list:
-    """Load machines from data/machines.json or return mock data."""
-    machines_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'machines.json')
-    try:
-        if os.path.exists(machines_path):
-            with open(machines_path) as f:
-                data = json.load(f)
-                if isinstance(data, dict) and "machines" in data:
-                    return data["machines"]
-                elif isinstance(data, list):
-                    return data
-    except Exception:
-        pass
-
-    return [
-        {
-            "id": "MX-204",
-            "name": "Hydraulic Press B",
-            "type": "Hydraulic Press",
-            "location": "Building A, Floor 2",
-            "status": "operational",
-            "temperature": 45
-        },
-        {
-            "id": "MX-105",
-            "name": "CNC Milling Machine A",
-            "type": "CNC Mill",
-            "location": "Building B, Floor 1",
-            "status": "operational",
-            "temperature": 52
-        }
-    ]
-
-
-def load_error_codes_data() -> list:
-    """Load error codes from data/error_codes.json or return mock data."""
-    errors_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'error_codes.json')
-    try:
-        if os.path.exists(errors_path):
-            with open(errors_path) as f:
-                data = json.load(f)
-                if isinstance(data, dict) and "error_codes" in data:
-                    return data["error_codes"]
-                elif isinstance(data, list):
-                    return data
-    except Exception:
-        pass
-
-    return [
-        {
-            "code": "E17",
-            "description": "Low hydraulic pressure detected",
-            "severity": "high",
-            "symptom": "Temperature rise, slow operation, low pressure",
-            "recommended_action": "Inspect pump seal, check accumulator, test pressure relief valve"
-        },
-        {
-            "code": "E23",
-            "description": "Motor overload protection triggered",
-            "severity": "medium",
-            "symptom": "Motor shutdown, thermal sensor activation",
-            "recommended_action": "Check for mechanical obstruction, verify electrical load"
-        }
-    ]
 
 
 # ============================================================================
@@ -136,21 +68,28 @@ def fault_analysis_agent(state: WorkflowState) -> WorkflowState:
     """
     AGENT 1: Fault Analysis
 
-    Extract machine_id, error_code, request_type from user input.
-    Uses AgentEngine (pre-configured Gemini wrapper).
+    Pure LLM-based extraction using AgentEngine.
+    Analyzes user input to extract machine_id, error_code via Gemini reasoning.
     """
     from src.agent_engine import AgentEngine
 
     user_input = state["user_input"]
-    logger.info(f"[Agent 1] Fault Analysis starting")
+    logger.info(f"[Agent 1] Fault Analysis starting via LLM")
 
     try:
         agent = AgentEngine('operator')
 
-        extraction_prompt = f"""Extract machine fault information from this text:
-"{user_input}"
+        extraction_prompt = f"""You are a machine operator support system. Analyze this fault report:
 
-Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
+User Report: "{user_input}"
+
+Extract key information using your understanding of industrial equipment:
+1. What is the machine ID mentioned? (e.g., MX-204, CNC-A, etc.)
+2. What error code is reported? (e.g., E17, E23, etc.)
+3. What type of request is this? (Maintenance Request, Information, Inspection, etc.)
+4. Are there any missing critical details?
+
+Respond with JSON only (no markdown, no explanation):
 {{
     "machine_id": "extracted machine ID or UNKNOWN",
     "error_code": "extracted error code or UNKNOWN",
@@ -161,7 +100,7 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
         result = agent.process_query(extraction_prompt)
         response_text = result.get('response', '')
 
-        # Parse JSON
+        # Parse JSON from LLM response
         try:
             import re
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
@@ -169,20 +108,20 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
                 fault_data = json.loads(json_match.group())
             else:
                 fault_data = {
-                    "machine_id": "MX-204" if "MX-204" in user_input else "UNKNOWN",
-                    "error_code": "E17" if "E17" in user_input else ("E23" if "E23" in user_input else "UNKNOWN"),
+                    "machine_id": "UNKNOWN",
+                    "error_code": "UNKNOWN",
                     "request_type": "Maintenance Request",
-                    "missing_fields": []
+                    "missing_fields": ["machine_id", "error_code"]
                 }
         except (json.JSONDecodeError, AttributeError):
             fault_data = {
-                "machine_id": "MX-204" if "MX-204" in user_input else "UNKNOWN",
-                "error_code": "E17" if "E17" in user_input else ("E23" if "E23" in user_input else "UNKNOWN"),
+                "machine_id": "UNKNOWN",
+                "error_code": "UNKNOWN",
                 "request_type": "Maintenance Request",
-                "missing_fields": []
+                "missing_fields": ["machine_id", "error_code"]
             }
 
-        logger.info(f"[Agent 1] Extracted: {fault_data}")
+        logger.info(f"[Agent 1] LLM Extracted: {fault_data}")
 
         messages = state.get("messages", [])
         messages.append(AIMessage(content=f"Fault Analysis: {json.dumps(fault_data)}"))
@@ -214,8 +153,8 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
     """
     AGENT 2: Maintenance Diagnosis
 
-    Uses fault_analysis data to diagnose issue.
-    Looks up machine and error details, provides analysis via AgentEngine.
+    Pure LLM-based diagnosis using AgentEngine.
+    Takes fault analysis and provides detailed diagnostic reasoning via LLM.
     """
     from src.agent_engine import AgentEngine
 
@@ -226,22 +165,22 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
     logger.info(f"[Agent 2] Diagnosis starting: {machine_id}/{error_code}")
 
     try:
-        # Search tools
-        machines = load_machines_data()
-        machine_details = next((m for m in machines if m.get("id") == machine_id), {"error": "not found"})
-
-        errors = load_error_codes_data()
-        error_details = next((e for e in errors if e.get("code") == error_code), {"error": "not found"})
-
-        # Use AgentEngine for intelligent diagnosis
+        # Pure LLM diagnosis - let AgentEngine/Gemini reason about the issue
         agent = AgentEngine('engineer')
-        diagnosis_prompt = f"""Based on this machine and error data, provide a detailed diagnosis:
+        diagnosis_prompt = f"""You are a maintenance engineer. Analyze this equipment fault and provide diagnosis:
 
-Machine: {json.dumps(machine_details, indent=2)}
+Machine ID: {machine_id}
+Error Code: {error_code}
 
-Error Code Details: {json.dumps(error_details, indent=2)}
+Based on your knowledge of industrial equipment and common fault patterns:
+1. What severity is this fault? (low/medium/high/critical)
+2. What is the root cause likely to be?
+3. What specific action should be taken?
+4. How long might this repair take (in minutes)?
+5. What parts might be needed?
+6. Are there any safety concerns?
 
-Provide your analysis in JSON format:
+Provide your complete analysis in JSON format:
 {{
     "severity": "low/medium/high/critical",
     "root_cause": "detailed root cause analysis",
@@ -254,32 +193,38 @@ Provide your analysis in JSON format:
         result = agent.process_query(diagnosis_prompt)
         response_text = result.get('response', '')
 
-        # Parse diagnosis from AgentEngine
+        # Parse diagnosis from LLM
         try:
             import re
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
-                gemini_diagnosis = json.loads(json_match.group())
+                diagnosis_data_raw = json.loads(json_match.group())
             else:
-                gemini_diagnosis = {}
+                diagnosis_data_raw = {}
         except:
-            gemini_diagnosis = {}
+            diagnosis_data_raw = {}
 
-        # Build diagnosis with AgentEngine insights
-        severity = gemini_diagnosis.get("severity", error_details.get("severity", "unknown"))
-        root_cause = gemini_diagnosis.get("root_cause", error_details.get("symptom", "Unknown"))
-        recommended_action = gemini_diagnosis.get("recommended_action", error_details.get("recommended_action", "Contact supervisor"))
+        # Build diagnosis from pure LLM reasoning
+        severity = diagnosis_data_raw.get("severity", "unknown")
+        root_cause = diagnosis_data_raw.get("root_cause", "Unknown")
+        recommended_action = diagnosis_data_raw.get("recommended_action", "Contact supervisor")
+        repair_time = diagnosis_data_raw.get("estimated_repair_time_minutes", 60)
+        parts = diagnosis_data_raw.get("required_parts", [])
+        safety = diagnosis_data_raw.get("safety_concerns", "None identified")
 
         diagnosis_data = {
-            "machine_details": machine_details,
-            "error_details": error_details,
+            "machine_id": machine_id,
+            "error_code": error_code,
             "severity": severity,
             "root_cause": root_cause,
             "recommended_action": recommended_action,
-            "gemini_analysis": gemini_diagnosis
+            "estimated_repair_time_minutes": repair_time,
+            "required_parts": parts,
+            "safety_concerns": safety,
+            "llm_analysis": diagnosis_data_raw
         }
 
-        logger.info(f"[Agent 2] Diagnosis complete: {severity}")
+        logger.info(f"[Agent 2] LLM Diagnosis complete: {severity}")
 
         messages = state.get("messages", [])
         messages.append(AIMessage(content=f"Diagnosis: Severity={severity}"))
@@ -293,11 +238,14 @@ Provide your analysis in JSON format:
         return {
             "error": f"Diagnosis failed: {str(e)}",
             "diagnosis": {
-                "machine_details": {"error": "not found"},
-                "error_details": {"error": "not found"},
+                "machine_id": machine_id,
+                "error_code": error_code,
                 "severity": "unknown",
                 "root_cause": "Unknown",
-                "recommended_action": "Contact maintenance supervisor"
+                "recommended_action": "Contact maintenance supervisor",
+                "estimated_repair_time_minutes": 0,
+                "required_parts": [],
+                "safety_concerns": "Unknown"
             },
             "messages": state.get("messages", [])
         }
