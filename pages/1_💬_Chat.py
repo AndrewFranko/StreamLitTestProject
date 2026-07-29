@@ -236,8 +236,10 @@ if all_chats:
                     st.rerun()
 
         with col2:
+            # Use hash of id for session state key (Streamlit 1.41.1+ restricts session state keys)
+            safe_key = f"rename_{hash(chat['id'])}"
             if st.button("✏️", key=f"rename_{chat['id']}", use_container_width=True):
-                st.session_state[f"rename_{chat['id']}"] = True
+                st.session_state[safe_key] = True
 
         with col3:
             if st.button("🗑️", key=f"delete_{chat['id']}", use_container_width=True):
@@ -249,19 +251,20 @@ if all_chats:
                     st.rerun()
 
         # Rename input
-        if st.session_state.get(f"rename_{chat['id']}"):
+        safe_rename_key = f"rename_{hash(chat['id'])}"
+        if st.session_state.get(safe_rename_key):
             new_name = st.sidebar.text_input(f"Rename '{chat['name']}':", value=chat['name'], key=f"rename_input_{chat['id']}")
             col1, col2 = st.sidebar.columns(2)
             with col1:
                 if st.button("✅", key=f"rename_confirm_{chat['id']}"):
                     if rename_chat(st.session_state.role, chat['id'], new_name):
-                        st.session_state[f"rename_{chat['id']}"] = False
+                        st.session_state[safe_rename_key] = False
                         if st.session_state.current_chat_id == chat['id']:
                             st.session_state.current_chat_name = new_name
                         st.rerun()
             with col2:
                 if st.button("❌", key=f"rename_cancel_{chat['id']}"):
-                    st.session_state[f"rename_{chat['id']}"] = False
+                    st.session_state[safe_rename_key] = False
                     st.rerun()
 
 st.sidebar.divider()
