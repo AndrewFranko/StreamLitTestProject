@@ -70,13 +70,20 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*", "GET", "POST", "OPTIONS"],
+    allow_headers=["*", "Content-Type", "Authorization"],
+    expose_headers=["*"],
+    max_age=600,
 )
 
 # ============================================================================
 # ROOT ENDPOINT (for LangGraph Studio compatibility)
 # ============================================================================
+
+@app.options("/{full_path:path}")
+async def preflight_handler(full_path: str):
+    """Handle CORS preflight requests."""
+    return JSONResponse({"ok": True})
 
 @app.get("/")
 async def root():
