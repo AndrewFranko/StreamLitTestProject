@@ -340,5 +340,16 @@
     "status": "open",
     "created_at": "2026-07-29T12:38:09.140582",
     "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729125449",
+    "machine_id": "MX-204",
+    "machine_name": "Hydraulic Press B",
+    "error_code": "E17",
+    "description": "Perform a lockout/tagout (LOTO) procedure. Inspect all hydraulic hoses and fittings for external leaks. If no external leaks are found, conduct a pressure decay test on the cylinder to verify internal seal integrity. Inspect the hydraulic pump output pressure against the manufacturer's specifications.",
+    "severity": "high",
+    "status": "open",
+    "created_at": "2026-07-29T12:54:49.810485",
+    "assigned_technician": null
   }
 ]

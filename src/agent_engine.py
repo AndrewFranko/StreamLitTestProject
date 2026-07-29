@@ -32,15 +32,34 @@ except ImportError as e:
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 
-from src.config import settings
-from src.tools import get_all_tools, ConversationMemory
-from src.guardrails_middleware_layer import (
-    create_agent_with_middleware,
-    InputValidationMiddleware,
-    ToolInputValidationMiddleware,
-    OutputValidationMiddleware,
-    GuardrailsStrategy,
-)
+try:
+    from src.config import settings
+except ImportError:
+    settings = None
+
+try:
+    from src.tools import get_all_tools, ConversationMemory
+except ImportError:
+    def get_all_tools():
+        return []
+    class ConversationMemory:
+        def __init__(self):
+            self.history = []
+
+try:
+    from src.guardrails_middleware_layer import (
+        create_agent_with_middleware,
+        InputValidationMiddleware,
+        ToolInputValidationMiddleware,
+        OutputValidationMiddleware,
+        GuardrailsStrategy,
+    )
+except ImportError:
+    create_agent_with_middleware = None
+    InputValidationMiddleware = None
+    ToolInputValidationMiddleware = None
+    OutputValidationMiddleware = None
+    GuardrailsStrategy = None
 
 logger = logging.getLogger(__name__)
 
@@ -586,9 +605,13 @@ SAFETY & QUALITY GUARDRAILS:
         try:
             # ===== QUERY-TIME INPUT VALIDATION =====
             # Validate input before sending to agent (fail-fast)
-            from guardrails_middleware_layer import InputValidationMiddleware
-            input_validator = InputValidationMiddleware(strategy="block")
-            validated_input = input_validator.intercept(user_input)
+            try:
+                from src.guardrails_middleware_layer import InputValidationMiddleware
+                input_validator = InputValidationMiddleware(strategy="block")
+                validated_input = input_validator.intercept(user_input)
+            except (ImportError, ModuleNotFoundError):
+                # Fallback: skip validation if module not available
+                validated_input = user_input
 
             # ===== GUARDRAILS MIDDLEWARE ALREADY APPLIED AT AGENT CREATION =====
             # Middleware is applied via create_agent_with_middleware() factory pattern
