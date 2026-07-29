@@ -90,8 +90,11 @@ async def root():
     """Root endpoint for LangGraph Studio."""
     return JSONResponse({
         "status": "ok",
-        "server": "LangGraph Agent Server",
-        "version": "2.0"
+        "server": "FactoryOps AI Level 3 Workflow Server",
+        "version": "2.0",
+        "streamlit_app": "http://localhost:8501",
+        "langgraph_studio": "http://localhost:3000",
+        "langsmith_studio": "https://eu.smith.langchain.com/studio"
     })
 
 # ============================================================================
@@ -288,13 +291,48 @@ async def stream_run(run_id: str, data: dict):
 
 @app.get("/graphs")
 async def get_graphs():
-    """Get available graphs (for LangGraph Studio compatibility)."""
+    """Get available graphs with full topology (for LangGraph Studio visualization)."""
     return JSONResponse({
         "graphs": [
             {
-                "name": "level3_workflow",
-                "description": "Level 3 Multi-Agent Fault Handling Workflow",
-                "type": "compiled_state_graph"
+                "id": "level3_workflow",
+                "name": "Level 3 Workflow",
+                "description": "Multi-Agent Fault Handling Workflow",
+                "type": "compiled_state_graph",
+                "nodes": [
+                    {
+                        "id": "fault_analysis",
+                        "label": "Fault Analysis Agent",
+                        "type": "agent",
+                        "position": {"x": 0, "y": 0}
+                    },
+                    {
+                        "id": "diagnosis",
+                        "label": "Diagnosis Agent",
+                        "type": "agent",
+                        "position": {"x": 400, "y": 0}
+                    },
+                    {
+                        "id": "request",
+                        "label": "Request Agent",
+                        "type": "agent",
+                        "position": {"x": 800, "y": 0}
+                    }
+                ],
+                "edges": [
+                    {
+                        "source": "fault_analysis",
+                        "target": "diagnosis",
+                        "label": "fault_analysis"
+                    },
+                    {
+                        "source": "diagnosis",
+                        "target": "request",
+                        "label": "diagnosis"
+                    }
+                ],
+                "entry_point": "fault_analysis",
+                "exit_point": "request"
             }
         ]
     })
@@ -318,7 +356,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 3000
+    port = 4000
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
