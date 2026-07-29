@@ -8,6 +8,21 @@ from datetime import datetime
 from typing import Optional, Dict, List, Any
 import json
 
+# Load Streamlit Cloud secrets FIRST (before importing other modules)
+try:
+    # Required secrets for Gemini API
+    if "GOOGLE_API_KEY" in st.secrets:
+        import os
+        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+
+    # Optional secrets for LangSmith
+    if "LANGSMITH_API_KEY" in st.secrets:
+        import os
+        os.environ["LANGSMITH_API_KEY"] = st.secrets["LANGSMITH_API_KEY"]
+except KeyError:
+    st.error("Missing GOOGLE_API_KEY in Streamlit Cloud Secrets!")
+    st.stop()
+
 # Page configuration
 st.set_page_config(
     page_title="FactoryOps AI",

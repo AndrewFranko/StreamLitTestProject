@@ -1,9 +1,10 @@
 """
 Configuration module for FactoryOps AI.
 Loads settings from:
-1. Streamlit Cloud secrets (st.secrets)
-2. pyproject.toml and pyproject.local.toml
-3. Environment variables
+1. Streamlit Cloud secrets (st.secrets) - highest priority
+2. Environment variables
+3. pyproject.local.toml
+4. pyproject.toml
 Uses Pydantic BaseSettings for flexible configuration management.
 """
 
@@ -17,17 +18,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def load_streamlit_secrets() -> dict:
-    """Load secrets from Streamlit Cloud secrets.toml via st.secrets."""
+def load_streamlit_secrets():
+    """
+    Load secrets from Streamlit Cloud secrets.
+    This should be called early in the app initialization.
+    """
     try:
         import streamlit as st
-        # st.secrets is available in Streamlit Cloud
-        if hasattr(st, 'secrets') and st.secrets:
-            logger.debug("Loaded secrets from Streamlit Cloud")
-            return dict(st.secrets)
+
+        # List of secrets to load from Streamlit
+        secret_keys = [
+            "GOOGLE_API_KEY",
+            "LANGSMITH_API_KEY",
+            "LANGSMITH_PROJECT",
+            "LANGSMITH_ENDPOINT",
+            "APP_ENV",
+        ]
+
+        for key in secret_keys:
+            try:
+                if key in st.secrets:
+                    os.environ[key] = st.secrets[key]
+                    logger.debug(f"Loaded {key} from Streamlit Cloud secrets")
+            except KeyError:
+                pass  # Key not in secrets, that's ok
+
+    except ImportError:
+        logger.debug("Streamlit not available - running locally")
     except Exception as e:
-        logger.debug(f"Streamlit secrets not available (expected locally): {e}")
-    return {}
+        logger.debug(f"Could not load Streamlit secrets: {e}")
 
 
 def load_pyproject_config() -> dict:
@@ -141,8 +160,8 @@ def _merge_all_settings():
     Merge settings from multiple sources into environment variables for Pydantic.
     Priority: Streamlit secrets > Environment vars > pyproject.local.toml > pyproject.toml
     """
-    # 1. Load Streamlit Cloud secrets (highest priority)
-    streamlit_secrets = load_streamlit_secrets()
+    # 1. Load Streamlit Cloud secrets FIRST (highest priority)
+    load_streamlit_secrets()
 
     # 2. Load TOML configs
     toml_config = load_pyproject_config()
@@ -159,23 +178,16 @@ def _merge_all_settings():
             if isinstance(v, dict):
                 items.extend(flatten_dict(v, new_key, sep=sep).items())
             elif v is not None:  # Only set if value is not None
-                # Don't override existing environment variables
+                # Don't override existing environment variables (set by Streamlit secrets)
                 if not os.getenv(new_key):
                     os.environ[new_key] = str(v)
                     logger.debug(f"Set {new_key} from TOML config")
                 items.append((new_key, v))
         return dict(items)
 
-    # Flatten and merge TOML config
+    # Flatten and merge TOML config (only if not already set by Streamlit)
     if toml_config:
         flatten_dict(toml_config)
-
-    # Override with Streamlit secrets (if available)
-    for key, value in streamlit_secrets.items():
-        if value is not None:
-            env_key = key.upper().replace("-", "_")
-            os.environ[env_key] = str(value)
-            logger.debug(f"Set {env_key} from Streamlit Cloud secrets")
 
 
 @lru_cache(maxsize=1)
@@ -209,8 +221,7 @@ def get_settings() -> Settings:
         logger.debug(
             f"  Database: {settings.database_url}\n"
             f"  LangSmith: {settings.langsmith_project}\n"
-            f"  Data paths: {settings.machines_data_path}\n"
-            f"  Using Streamlit Cloud secrets: {bool(load_streamlit_secrets())}"
+            f"  Data paths: {settings.machines_data_path}"
         )
         return settings
     except Exception as e:
