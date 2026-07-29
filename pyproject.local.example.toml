@@ -1,0 +1,23 @@
+# Local configuration template - DO NOT COMMIT TO GIT
+# This file is gitignored and should only exist locally
+# Copy this to pyproject.local.toml and fill in your secrets
+
+# REQUIRED: Gemini API Key
+# Get your API key from: https://aistudio.google.com/apikey
+[tool.factoryops.api]
+google-api-key = "your-gemini-api-key-here"
+
+# OPTIONAL: LangSmith Tracing (for Studio monitoring)
+# Get your API key from: https://smith.langchain.com/
+[tool.factoryops.langsmith]
+api-key = "your-langsmith-api-key-here"
+project = "Factory"
+
+# OPTIONAL: Customize environment
+[tool.factoryops.app]
+env = "development"  # development, staging, production
+log-level = "INFO"
+
+# OPTIONAL: Database customization for production
+# [tool.factoryops.database]
+# url = "postgresql://user:pass@localhost/factory_ops"

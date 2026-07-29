@@ -5,6 +5,13 @@ import os
 # Add src directory to path to import modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
+# Initialize LangSmith tracing
+try:
+    from langsmith_config import setup_langsmith
+    setup_langsmith()
+except ImportError:
+    pass
+
 # Debug: Write all output to file
 DEBUG_FILE = "c:/StreamLit/debug_trace.txt"
 def debug_log(msg):

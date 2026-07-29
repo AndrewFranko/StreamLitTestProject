@@ -7,12 +7,22 @@ No LangGraph dependency - pure LangChain only.
 
 import sys
 import logging
+import os
 from typing import List, Dict, Any
 from datetime import datetime
 
 # Ensure UTF-8 encoding for Windows compatibility
 if sys.stdout.encoding != 'utf-8':
     sys.stdout.reconfigure(encoding='utf-8')
+
+# Initialize LangSmith tracing
+try:
+    from src.langsmith_config import setup_langsmith, LANGSMITH_ENABLED
+    setup_langsmith()
+except ImportError:
+    LANGSMITH_ENABLED = False
+    logger = logging.getLogger(__name__)
+    logger.debug("LangSmith config not available")
 
 try:
     from langchain_google_genai import ChatGoogleGenerativeAI

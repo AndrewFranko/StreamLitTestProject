@@ -384,5 +384,38 @@
     "status": "open",
     "created_at": "2026-07-29T13:07:40.501461",
     "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729134936",
+    "machine_id": "UNKNOWN",
+    "machine_name": "Unknown",
+    "error_code": "UNKNOWN",
+    "description": "Contact supervisor",
+    "severity": "unknown",
+    "status": "open",
+    "created_at": "2026-07-29T13:49:36.965380",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729140343",
+    "machine_id": "UNKNOWN",
+    "machine_name": "Unknown",
+    "error_code": "UNKNOWN",
+    "description": "Contact supervisor",
+    "severity": "unknown",
+    "status": "open",
+    "created_at": "2026-07-29T14:03:43.305492",
+    "assigned_technician": null
+  },
+  {
+    "ticket_id": "TICK-20260729143100",
+    "machine_id": "UNKNOWN",
+    "machine_name": "Unknown",
+    "error_code": "UNKNOWN",
+    "description": "Contact supervisor",
+    "severity": "unknown",
+    "status": "open",
+    "created_at": "2026-07-29T14:31:00.009838",
+    "assigned_technician": null
   }
 ]
