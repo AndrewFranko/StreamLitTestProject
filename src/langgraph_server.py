@@ -208,41 +208,40 @@ async def workflow_info():
 # LANGGRAPH API ENDPOINTS (required by LangGraph Studio)
 # ============================================================================
 
-@app.get("/api/runs")
+@app.api_route("/api/runs", methods=["GET", "POST", "OPTIONS"])
 async def list_runs():
     """List all runs."""
     return JSONResponse([])
 
-@app.post("/api/runs")
-async def create_run(data: dict):
-    """Create a new run."""
-    return JSONResponse({
-        "run_id": "run-1",
-        "status": "pending",
-        "created_at": "2026-07-29T10:00:00Z"
-    })
-
-@app.get("/api/threads")
+@app.api_route("/api/threads", methods=["GET", "POST", "OPTIONS"])
 async def list_threads():
     """List all threads."""
     return JSONResponse([])
 
-@app.post("/api/threads")
-async def create_thread(data: dict):
-    """Create a new thread."""
-    return JSONResponse({
-        "thread_id": "thread-1",
-        "created_at": "2026-07-29T10:00:00Z"
-    })
-
-@app.get("/api/assistants")
+@app.api_route("/api/assistants", methods=["GET", "POST", "OPTIONS"])
 async def list_assistants():
-    """List all assistants."""
-    return JSONResponse([{
-        "id": "level3_workflow",
-        "name": "Level 3 Workflow",
-        "description": "Multi-agent fault handling workflow"
-    }])
+    """List all assistants in LangGraph format."""
+    import uuid
+    from datetime import datetime
+
+    assistants = [{
+        "assistant_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, "level3_workflow")),
+        "graph_id": "level3_workflow",
+        "name": "Level 3 Multi-Agent Workflow",
+        "description": "Fault Analysis -> Diagnosis -> Request",
+        "context": {
+            "agents": 3,
+            "flow": "sequential"
+        },
+        "metadata": {
+            "type": "multi_agent",
+            "nodes": ["fault_analysis", "diagnosis", "request"]
+        },
+        "created_at": datetime.utcnow().isoformat() + "+00:00",
+        "updated_at": datetime.utcnow().isoformat() + "+00:00"
+    }]
+
+    return JSONResponse(assistants)
 
 @app.get("/openapi.json")
 async def openapi():
@@ -356,7 +355,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 4000
+    port = 5000
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
