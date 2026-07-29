@@ -220,7 +220,7 @@ async def list_threads():
 
 @app.post("/assistants/search")
 async def search_assistants(req: Request):
-    """Search assistants - accepts any request format including empty body."""
+    """Search assistants - implements LangGraph Server API protocol (2026)."""
     import uuid
     from datetime import datetime
 
@@ -230,22 +230,35 @@ async def search_assistants(req: Request):
     except:
         body = {}
 
-    assistants = [{
-        "assistant_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, "level3_workflow")),
-        "graph_id": "level3_workflow",
-        "name": "Level 3 Multi-Agent Workflow",
-        "description": "Fault Analysis -> Diagnosis -> Request",
-        "context": {
-            "agents": 3,
-            "flow": "sequential"
-        },
-        "metadata": {
-            "type": "multi_agent",
-            "nodes": ["fault_analysis", "diagnosis", "request"]
-        },
-        "created_at": datetime.utcnow().isoformat() + "+00:00",
-        "updated_at": datetime.utcnow().isoformat() + "+00:00"
-    }]
+    # LangGraph Server API response format (2026 spec)
+    assistants = {
+        "assistants": [
+            {
+                "assistant_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, "level3_workflow")),
+                "graph_id": "level3_workflow",
+                "name": "Level 3 Multi-Agent Workflow",
+                "description": "Multi-agent fault handling: Fault Analysis → Diagnosis → Request",
+                "config": {
+                    "tags": ["multi-agent", "manufacturing", "fault-handling"],
+                    "recursion_limit": 25,
+                    "configurable": {}
+                },
+                "created_at": datetime.utcnow().isoformat() + "Z",
+                "updated_at": datetime.utcnow().isoformat() + "Z",
+                "metadata": {
+                    "type": "multi_agent",
+                    "nodes": ["fault_analysis", "diagnosis", "request"],
+                    "agents": 3,
+                    "flow": "sequential"
+                }
+            }
+        ],
+        "pagination": {
+            "limit": 10,
+            "offset": 0,
+            "total": 1
+        }
+    }
 
     return JSONResponse(assistants)
 
@@ -318,6 +331,109 @@ async def get_run(run_id: str):
 async def stream_run(run_id: str, data: dict):
     """Stream run output (for LangGraph Studio compatibility)."""
     return JSONResponse({"status": "streaming"})
+
+@app.get("/assistants/{assistant_id}/schemas")
+async def get_assistant_schemas(assistant_id: str):
+    """Get input/output schemas for graph introspection (LangGraph Studio)."""
+    return JSONResponse({
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "user_input": {
+                    "type": "string",
+                    "description": "User query about machine fault or error"
+                },
+                "messages": {
+                    "type": "array",
+                    "description": "Chat message history"
+                }
+            },
+            "required": ["user_input"]
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "user_input": {"type": "string"},
+                "fault_analysis": {
+                    "type": "object",
+                    "description": "Extracted fault information"
+                },
+                "diagnosis": {
+                    "type": "object",
+                    "description": "Diagnostic analysis from maintenance agent"
+                },
+                "awaiting_approval": {
+                    "type": "boolean",
+                    "description": "Waiting for human approval"
+                },
+                "ticket_created": {
+                    "type": "boolean",
+                    "description": "Maintenance ticket successfully created"
+                }
+            }
+        },
+        "state_schema": {
+            "type": "object",
+            "properties": {
+                "user_input": {"type": "string"},
+                "messages": {"type": "array"},
+                "fault_analysis": {"type": "object"},
+                "diagnosis": {"type": "object"},
+                "awaiting_approval": {"type": "boolean"},
+                "ticket_created": {"type": "boolean"},
+                "error": {"type": "string"}
+            }
+        }
+    })
+
+@app.get("/assistants/{assistant_id}/graph")
+async def get_assistant_graph(assistant_id: str):
+    """Get graph topology for visualization (LangGraph Studio)."""
+    return JSONResponse({
+        "id": "level3_workflow",
+        "name": "Level 3 Workflow",
+        "description": "Multi-Agent Fault Handling Workflow",
+        "type": "compiled_state_graph",
+        "nodes": [
+            {
+                "id": "fault_analysis",
+                "label": "Fault Analysis Agent",
+                "type": "agent",
+                "position": {"x": 0, "y": 0},
+                "description": "Extract machine_id and error_code"
+            },
+            {
+                "id": "diagnosis",
+                "label": "Diagnosis Agent",
+                "type": "agent",
+                "position": {"x": 400, "y": 0},
+                "description": "Lookup machine specs and error info"
+            },
+            {
+                "id": "request",
+                "label": "Request Agent",
+                "type": "agent",
+                "position": {"x": 800, "y": 0},
+                "description": "Present recommendation and request approval"
+            }
+        ],
+        "edges": [
+            {
+                "source": "fault_analysis",
+                "target": "diagnosis",
+                "label": "fault_analysis output",
+                "type": "transition"
+            },
+            {
+                "source": "diagnosis",
+                "target": "request",
+                "label": "diagnosis output",
+                "type": "transition"
+            }
+        ],
+        "entry_point": "fault_analysis",
+        "exit_point": "request"
+    })
 
 @app.get("/graphs")
 async def get_graphs():
