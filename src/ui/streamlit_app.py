@@ -3,24 +3,17 @@ FactoryOps AI - Level 2 Agent UI
 Streamlit interface with role-based chat, tool execution display, and ticket approval workflow.
 """
 
+import os
 import streamlit as st
 from datetime import datetime
 from typing import Optional, Dict, List, Any
 import json
 
-# Load Streamlit Cloud secrets FIRST (before importing other modules)
+# Load Streamlit Cloud secrets - THIS MUST BE FIRST
 try:
-    # Required secrets for Gemini API
-    if "GOOGLE_API_KEY" in st.secrets:
-        import os
-        os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-
-    # Optional secrets for LangSmith
-    if "LANGSMITH_API_KEY" in st.secrets:
-        import os
-        os.environ["LANGSMITH_API_KEY"] = st.secrets["LANGSMITH_API_KEY"]
+    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 except KeyError:
-    st.error("Missing GOOGLE_API_KEY in Streamlit Cloud Secrets!")
+    st.error("Missing GOOGLE_API_KEY! Please add it to your Streamlit Cloud Secrets.")
     st.stop()
 
 # Page configuration
