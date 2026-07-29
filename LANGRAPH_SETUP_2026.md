@@ -14,8 +14,9 @@ Your server now implements the **LangGraph Server API Protocol (2026)** with ful
 
 **FastAPI Server Running At:**
 ```
-http://localhost:8080
+http://localhost:9000
 ```
+*(Note: Moved from 8080 due to zombie socket on Windows)*
 
 **Streamlit App Running At:**
 ```
@@ -31,6 +32,25 @@ Project: Factory
 ---
 
 ## 🔗 Implemented Endpoints (LangGraph Server API 2026)
+
+### ✅ Graph Introspection Endpoints (NOW WORKING!)
+
+**4. GET /graph/mermaid** - Returns actual Mermaid diagram of workflow
+```json
+{
+  "format": "mermaid",
+  "diagram": "graph TD; __start__([start]) --> fault_analysis; fault_analysis --> diagnosis; diagnosis --> request; request --> __end__([end])"
+}
+```
+
+**5. GET /assistants/{id}/graph** - Returns graph structure with node/edge topology
+- Extracts from compiled workflow
+- Fallback to manual structure if extraction fails
+- Status: ✅ HTTP 200
+
+---
+
+## 🔗 Core API Endpoints (LangGraph Server API 2026)
 
 ### 1. **POST /assistants/search**
 Find and list available agents/workflows.
@@ -158,7 +178,7 @@ Execute the workflow with input.
 ### **Option A: LangGraph Studio (Recommended)**
 
 1. Go to: `https://smith.langchain.com/studio` (or EU: `https://eu.smith.langchain.com/studio`)
-2. Enter endpoint: `http://localhost:8080`
+2. Enter endpoint: `http://localhost:9000`
 3. Studio will:
    - Fetch assistants from `/assistants/search`
    - Load graph topology from `/assistants/{id}/graph`
@@ -168,15 +188,18 @@ Execute the workflow with input.
 
 ```bash
 # Test the server
-curl http://localhost:8080/health
+curl http://localhost:9000/health
+
+# Get workflow diagram
+curl http://localhost:9000/graph/mermaid
 
 # Invoke workflow
-curl -X POST http://localhost:8080/invoke \
+curl -X POST http://localhost:9000/invoke \
   -H "Content-Type: application/json" \
   -d '{"input": "Machine MX-204 error E17"}'
 
 # Get assistant info
-curl http://localhost:8080/assistants/search
+curl -X POST http://localhost:9000/assistants/search
 ```
 
 ### **Option C: Streamlit App (UI)**
@@ -297,7 +320,8 @@ Response to User
 ```bash
 cd c:/StreamLit
 python src/langgraph_server.py
-# Starts at http://localhost:8080
+# Starts at http://localhost:9000
+# Shows Mermaid diagram of graph topology
 ```
 
 ### **Terminal 2: Start Streamlit App**
@@ -305,24 +329,37 @@ python src/langgraph_server.py
 cd c:/StreamLit
 streamlit run app.py
 # Starts at http://localhost:8501
+# User interface for workflow
 ```
 
-### **Terminal 3: Monitor LangSmith**
-Go to: `https://eu.smith.langchain.com/studio`
+### **Terminal 3: Open LangGraph Studio**
+```
+https://eu.smith.langchain.com/studio
+Enter endpoint: http://localhost:9000
+View: Graph topology + execution traces
+```
+
+### **Terminal 4 (Optional): Monitor LangSmith**
+Go to: `https://eu.smith.langchain.com`
+Project: `Factory`
+View: Traces from workflow executions
 
 ---
 
 ## ✅ Verification Checklist
 
-- [x] FastAPI server starts without errors
-- [x] `/assistants/search` returns proper format
-- [x] `/assistants/{id}/schemas` provides type definitions
-- [x] `/assistants/{id}/graph` returns topology with 3 nodes
-- [x] `/invoke` executes workflow and shows all 3 agents
-- [x] Streamlit app connects to backend
-- [x] LangSmith receives traces from workflow
+- [x] FastAPI server starts on port 9000 without errors
+- [x] `/assistants/search` returns proper format with pagination
+- [x] `/assistants/{id}/schemas` provides input/output/state type definitions
+- [x] `/assistants/{id}/graph` returns topology with 3 nodes (with introspection)
+- [x] `/graph/mermaid` returns actual Mermaid diagram of workflow
+- [x] `/invoke` executes workflow and shows all 3 agents sequentially
+- [x] Streamlit app connects to backend on port 9000
+- [x] LangSmith receives traces from workflow (project: Factory)
 - [x] Human approval flow works in Streamlit
 - [x] Tickets are created after approval
+- [x] LangGraph Studio connects and visualizes graph topology
+- [x] All endpoints return HTTP 200 with proper JSON format
 
 ---
 
