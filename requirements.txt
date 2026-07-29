@@ -2,10 +2,11 @@
 # Python 3.10+
 # Streamlit Cloud compatible versions
 
-# Core LLM & LangChain
-langchain==0.3.6
-langchain-google-genai==1.0.6
-google-generativeai==0.5.4
+# Core LLM & LangChain (compatible versions)
+langchain==0.2.16
+langchain-core==0.2.38
+langchain-google-genai==0.2.2
+google-generativeai==0.7.2
 
 # Streamlit Web UI
 streamlit==1.39.0
