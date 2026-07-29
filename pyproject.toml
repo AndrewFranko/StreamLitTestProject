@@ -9,7 +9,7 @@ description = "AI-powered Manufacturing Assistant for FactoryOps"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "GlobalLogic Engineering Team", email = "engineering@globallogic.com"}
+    {name = ""}
 ]
 keywords = ["manufacturing", "ai", "langchain", "streamlit", "gemini"]
 classifiers = [
@@ -21,17 +21,15 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "langchain==1.3.14",
-    "langchain-core==1.5.1",
-    "langchain-google-genai==4.3.2",
-    "google-generativeai==0.8.6",
-    "google-genai==2.14.0",
-    "streamlit==1.60.0",
+    "langchain==0.3.6",
+    "langchain-google-genai==1.0.6",
+    "google-generativeai==0.5.4",
+    "streamlit==1.39.0",
     "python-dotenv==1.1.0",
-    "pydantic==2.13.4",
-    "pydantic-settings==2.14.2",
-    "requests==2.34.2",
-    "requests-toolbelt==1.0.0",
+    "pydantic==2.7.4",
+    "pydantic-settings==2.2.1",
+    "requests==2.32.3",
+    "protobuf>=5.29.6,<6.0.0",
 ]
 
 [project.optional-dependencies]
