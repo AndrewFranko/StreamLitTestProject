@@ -31,6 +31,7 @@ load_dotenv()
 try:
     from fastapi import FastAPI
     from fastapi.responses import JSONResponse
+    from fastapi.middleware.cors import CORSMiddleware
     import uvicorn
     from langchain_core.messages import HumanMessage
     from level3_multi_agent_workflow_v2 import build_langgraph_workflow
@@ -62,6 +63,15 @@ app = FastAPI(
     title="FactoryOps AI - Level 3 Workflow",
     description="LangGraph Agent Server for multi-agent fault handling workflow",
     version="2.0"
+)
+
+# Enable CORS for LangGraph Studio
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ============================================================================
@@ -167,6 +177,47 @@ async def workflow_info():
     })
 
 # ============================================================================
+# LANGGRAPH STUDIO COMPATIBILITY ENDPOINTS
+# ============================================================================
+
+@app.get("/runs")
+async def list_runs():
+    """List runs (for LangGraph Studio compatibility)."""
+    return JSONResponse([])
+
+@app.post("/runs")
+async def create_run(data: dict):
+    """Create a run (for LangGraph Studio compatibility)."""
+    return JSONResponse({"run_id": "default", "status": "created"})
+
+@app.get("/runs/{run_id}")
+async def get_run(run_id: str):
+    """Get run details (for LangGraph Studio compatibility)."""
+    return JSONResponse({
+        "run_id": run_id,
+        "status": "completed",
+        "output": {}
+    })
+
+@app.post("/runs/{run_id}/stream")
+async def stream_run(run_id: str, data: dict):
+    """Stream run output (for LangGraph Studio compatibility)."""
+    return JSONResponse({"status": "streaming"})
+
+@app.get("/graphs")
+async def get_graphs():
+    """Get available graphs (for LangGraph Studio compatibility)."""
+    return JSONResponse({
+        "graphs": [
+            {
+                "name": "level3_workflow",
+                "description": "Level 3 Multi-Agent Fault Handling Workflow",
+                "type": "compiled_state_graph"
+            }
+        ]
+    })
+
+# ============================================================================
 # STARTUP/SHUTDOWN EVENTS
 # ============================================================================
 
@@ -185,7 +236,7 @@ async def shutdown_event():
 # ============================================================================
 
 if __name__ == "__main__":
-    port = 8888
+    port = 7777
 
     print("\n" + "="*70)
     print("[SERVER] Starting LangGraph Agent Server")
