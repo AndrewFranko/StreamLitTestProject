@@ -1,16 +1,9 @@
 """
-Level 3: True Multi-Agent Architecture using Modern LangGraph (2026)
+Level 3: True Multi-Agent Architecture with RELIABLE RunTree Tracing
 
-Uses the modern LangGraph pattern where:
-- Each agent is a full reasoning node with its own tools
-- Nodes handle agent logic AND tool invocation loops
-- State is shared and merged by LangGraph
-- Routing via conditional edges
-
-Three independent agents:
-1. Fault Analysis Agent - extracts machine_id, error_code, request_type
-2. Maintenance Diagnosis Agent - looks up machine/error, determines severity
-3. Maintenance Request Agent - presents recommendation, awaits approval
+Uses explicit LangSmith RunTree for synchronous, reliable tracing.
+Each agent uses ChatGoogleGenerativeAI directly (no AgentEngine complexity).
+Workflow executes three sequential agents with explicit RunTree wrapping.
 """
 
 import json
@@ -20,18 +13,7 @@ from datetime import datetime
 import sys
 import logging
 
-# Setup logger FIRST (before any logging calls)
 logger = logging.getLogger(__name__)
-
-# Setup LangSmith tracing
-LANGSMITH_ENABLED = False
-try:
-    from langsmith_config import LANGSMITH_ENABLED
-except ImportError:
-    try:
-        from src.langsmith_config import LANGSMITH_ENABLED
-    except ImportError:
-        LANGSMITH_ENABLED = False
 
 # LangGraph imports
 try:
@@ -41,13 +23,19 @@ try:
 except ImportError as e:
     LANGGRAPH_AVAILABLE = False
     logger.error(f"[FAIL] LangGraph import failed: {e}")
-except Exception as e:
-    LANGGRAPH_AVAILABLE = False
-    logger.error(f"[FAIL] Unexpected error importing LangGraph: {e}")
 
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 
+# LangSmith imports
+try:
+    from langsmith import traceable
+    LANGSMITH_AVAILABLE = True
+except ImportError:
+    def traceable(func):
+        return func
+    LANGSMITH_AVAILABLE = False
 
 # ============================================================================
 # STATE DEFINITION
@@ -146,26 +134,19 @@ def load_error_codes_data() -> list:
 # AGENT 1: FAULT ANALYSIS AGENT
 # ============================================================================
 
+@traceable(name="Fault Analysis Agent")
 def fault_analysis_agent(state: WorkflowState) -> WorkflowState:
     """
     AGENT 1: Fault Analysis
 
-    Reads: user_input
-    Task: Extract machine_id, error_code, request_type
-    Writes: fault_analysis
-
-    This is a full agent node that:
-    1. Takes user input
-    2. Uses LLM to extract structured data
-    3. Returns extracted fields
+    Extract machine_id, error_code, request_type from user input.
+    Uses ChatGoogleGenerativeAI directly for maximum reliability.
     """
-    from agent_engine import AgentEngine
-
     user_input = state["user_input"]
     logger.info(f"[Agent 1] Fault Analysis starting")
 
     try:
-        agent = AgentEngine('operator')
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
 
         extraction_prompt = f"""Extract machine fault information from this text:
 "{user_input}"
@@ -178,8 +159,8 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
     "missing_fields": []
 }}"""
 
-        result = agent.process_query(extraction_prompt)
-        response_text = result.get('response', '')
+        result = llm.invoke(extraction_prompt)
+        response_text = result.content
 
         # Parse JSON
         try:
@@ -188,7 +169,6 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
             if json_match:
                 fault_data = json.loads(json_match.group())
             else:
-                # Fallback parsing
                 fault_data = {
                     "machine_id": "MX-204" if "MX-204" in user_input else "UNKNOWN",
                     "error_code": "E17" if "E17" in user_input else ("E23" if "E23" in user_input else "UNKNOWN"),
@@ -205,7 +185,6 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
 
         logger.info(f"[Agent 1] Extracted: {fault_data}")
 
-        # Add message to history
         messages = state.get("messages", [])
         messages.append(AIMessage(content=f"Fault Analysis: {json.dumps(fault_data)}"))
 
@@ -213,7 +192,6 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
             "fault_analysis": fault_data,
             "messages": messages
         }
-
     except Exception as e:
         logger.error(f"[Agent 1] Error: {e}")
         return {
@@ -232,16 +210,13 @@ Return ONLY a JSON object (no markdown, no code blocks, just raw JSON):
 # AGENT 2: MAINTENANCE DIAGNOSIS AGENT
 # ============================================================================
 
+@traceable(name="Diagnosis Agent")
 def diagnosis_agent(state: WorkflowState) -> WorkflowState:
     """
     AGENT 2: Maintenance Diagnosis
 
-    Reads: fault_analysis
-    Tools: search_machine, lookup_error_code
-    Task: Diagnose issue, determine severity, recommend action
-    Writes: diagnosis
-
-    This agent has its own tools and performs a reasoning loop.
+    Uses fault_analysis data to diagnose issue.
+    Looks up machine and error details, provides analysis.
     """
     fault_data = state.get("fault_analysis", {})
     machine_id = fault_data.get("machine_id", "UNKNOWN")
@@ -250,6 +225,8 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
     logger.info(f"[Agent 2] Diagnosis starting: {machine_id}/{error_code}")
 
     try:
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+
         # Search tools
         machines = load_machines_data()
         machine_details = next((m for m in machines if m.get("id") == machine_id), {"error": "not found"})
@@ -257,15 +234,49 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
         errors = load_error_codes_data()
         error_details = next((e for e in errors if e.get("code") == error_code), {"error": "not found"})
 
-        # Build diagnosis
-        severity = error_details.get("severity", "unknown") if "error" not in error_details else "unknown"
+        # Use Gemini for intelligent diagnosis
+        diagnosis_prompt = f"""Based on this machine and error data, provide a detailed diagnosis:
+
+Machine: {json.dumps(machine_details, indent=2)}
+
+Error Code Details: {json.dumps(error_details, indent=2)}
+
+Provide your analysis in JSON format:
+{{
+    "severity": "low/medium/high/critical",
+    "root_cause": "detailed root cause analysis",
+    "recommended_action": "specific action to take",
+    "estimated_repair_time_minutes": number,
+    "required_parts": ["part1", "part2"],
+    "safety_concerns": "any safety issues to note"
+}}"""
+
+        result = llm.invoke(diagnosis_prompt)
+        response_text = result.content
+
+        # Parse diagnosis from Gemini
+        try:
+            import re
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                gemini_diagnosis = json.loads(json_match.group())
+            else:
+                gemini_diagnosis = {}
+        except:
+            gemini_diagnosis = {}
+
+        # Build diagnosis with Gemini insights
+        severity = gemini_diagnosis.get("severity", error_details.get("severity", "unknown"))
+        root_cause = gemini_diagnosis.get("root_cause", error_details.get("symptom", "Unknown"))
+        recommended_action = gemini_diagnosis.get("recommended_action", error_details.get("recommended_action", "Contact supervisor"))
 
         diagnosis_data = {
             "machine_details": machine_details,
             "error_details": error_details,
             "severity": severity,
-            "root_cause": error_details.get("root_cause") or error_details.get("symptom", "Unknown"),
-            "recommended_action": error_details.get("recommended_action", "Contact maintenance supervisor")
+            "root_cause": root_cause,
+            "recommended_action": recommended_action,
+            "gemini_analysis": gemini_diagnosis
         }
 
         logger.info(f"[Agent 2] Diagnosis complete: {severity}")
@@ -277,7 +288,6 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
             "diagnosis": diagnosis_data,
             "messages": messages
         }
-
     except Exception as e:
         logger.error(f"[Agent 2] Error: {e}")
         return {
@@ -297,15 +307,12 @@ def diagnosis_agent(state: WorkflowState) -> WorkflowState:
 # AGENT 3: MAINTENANCE REQUEST AGENT
 # ============================================================================
 
+@traceable(name="Request Agent")
 def request_agent(state: WorkflowState) -> WorkflowState:
     """
     AGENT 3: Maintenance Request
 
-    Reads: diagnosis, fault_analysis
-    Task: Present recommendation, await human approval
-    Writes: awaiting_approval, final_response
-
-    This agent ALWAYS waits for human approval before creating tickets.
+    Present recommendation and await human approval.
     """
     diagnosis = state.get("diagnosis", {})
     fault_data = state.get("fault_analysis", {})
@@ -317,26 +324,51 @@ def request_agent(state: WorkflowState) -> WorkflowState:
 
     logger.info(f"[Agent 3] Request Agent: awaiting approval")
 
-    messages = state.get("messages", [])
-    messages.append(AIMessage(content="Maintenance request ready for approval"))
+    try:
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
 
-    return {
-        "awaiting_approval": True,
-        "ticket_created": False,
-        "ticket_id": "",
-        "final_response": f"""
+        # Use Gemini to compose professional ticket summary
+        ticket_prompt = f"""Create a professional maintenance ticket summary for approval:
+
+Machine: {machine_id}
+Error Code: {error_code}
+Severity: {severity.upper()}
+Recommended Action: {recommended_action}
+Root Cause: {diagnosis.get('root_cause', 'Unknown')}
+
+Generate a clear, concise ticket description that a technician would understand:"""
+
+        result = llm.invoke(ticket_prompt)
+        ticket_description = result.content
+
+        messages = state.get("messages", [])
+        messages.append(AIMessage(content="Maintenance request ready for approval"))
+
+        output = {
+            "awaiting_approval": True,
+            "ticket_created": False,
+            "ticket_id": "",
+            "final_response": f"""
 Maintenance Request Ready for Approval
 ========================================
 Machine: {machine_id}
 Error Code: {error_code}
 Severity: {severity.upper()}
-Recommended Action: {recommended_action}
+
+Ticket Description (generated by Gemini):
+{ticket_description}
 
 ⚠️ APPROVAL REQUIRED
 Please review and approve ticket creation before proceeding.
-        """,
-        "messages": messages
-    }
+            """,
+            "messages": messages,
+            "ticket_description": ticket_description
+        }
+
+        return output
+    except Exception as e:
+        logger.error(f"[Agent 3] Error: {e}")
+        raise
 
 
 # ============================================================================
@@ -377,20 +409,17 @@ def build_langgraph_workflow():
 
 
 # ============================================================================
-# WORKFLOW EXECUTION
+# WORKFLOW EXECUTION WITH EXPLICIT RUNTREE TRACING
 # ============================================================================
 
 def execute_workflow(user_input: str, config: dict = None) -> dict:
-    """Execute the multi-agent workflow."""
+    """Execute multi-agent workflow with RELIABLE explicit RunTree tracing."""
+    import os
 
-    logger.info(f"[DEBUG] execute_workflow called with LANGGRAPH_AVAILABLE={LANGGRAPH_AVAILABLE}")
+    logger.info(f"[Workflow] Starting with RUNTREE-based explicit tracing")
 
     if not LANGGRAPH_AVAILABLE:
-        logger.error(f"[DEBUG] LANGGRAPH_AVAILABLE is False - raising ImportError")
-        raise ImportError(
-            "LangGraph is required for Level 3 workflow. "
-            "Install: pip install langgraph"
-        )
+        raise ImportError("LangGraph is required. Install: pip install langgraph")
 
     # Initialize state
     initial_state: WorkflowState = {
@@ -405,22 +434,64 @@ def execute_workflow(user_input: str, config: dict = None) -> dict:
         "error": ""
     }
 
+    workflow = build_langgraph_workflow()
+    if not workflow:
+        raise RuntimeError("Failed to build LangGraph workflow")
+
+    if config is None:
+        config = {"configurable": {"thread_id": f"fault_{datetime.now().timestamp()}"}}
+
+    # Create explicit LangSmith RunTree for RELIABLE tracing
     try:
-        workflow = build_langgraph_workflow()
-        if not workflow:
-            raise RuntimeError("Failed to build LangGraph workflow")
+        from langsmith.run_trees import RunTree
 
-        logger.info("[Workflow] Executing with modern LangGraph (v2 - true multi-agent)")
+        api_key = os.getenv('LANGSMITH_API_KEY')
+        endpoint = os.getenv('LANGSMITH_ENDPOINT', 'https://eu.api.smith.langchain.com')
+        project = os.getenv('LANGSMITH_PROJECT', 'Factory')
 
-        if config is None:
-            config = {"configurable": {"thread_id": f"fault_{datetime.now().timestamp()}"}}
+        # Create root run
+        root_run = RunTree(
+            name="Level3_MultiAgent_Workflow",
+            run_type="chain",
+            inputs={"user_input": user_input},
+            project_name=project,
+            client_kwargs={"api_key": api_key, "api_url": endpoint}
+        )
 
+        logger.info(f"[Workflow] Created RunTree: {root_run.id}")
+
+        try:
+            # Execute workflow
+            result = workflow.invoke(initial_state, config=config)
+
+            logger.info("[Workflow] Execution completed")
+            logger.info(f"  Machine: {result.get('fault_analysis', {}).get('machine_id')}")
+            logger.info(f"  Severity: {result.get('diagnosis', {}).get('severity')}")
+            logger.info(f"  Awaiting Approval: {result.get('awaiting_approval')}")
+
+            # Update run with results (SYNCHRONOUS)
+            root_run.outputs = {
+                "fault_analysis": result.get('fault_analysis', {}),
+                "diagnosis": result.get('diagnosis', {}),
+                "awaiting_approval": result.get('awaiting_approval', False)
+            }
+            root_run.end_time = datetime.now()
+
+            return result
+
+        finally:
+            # CRITICAL: Post the run to LangSmith (SYNCHRONOUS and RELIABLE)
+            root_run.post()
+            logger.info("[Workflow] ✓ RunTree posted to LangSmith (synchronous)")
+
+    except ImportError:
+        logger.warning("[Workflow] RunTree not available, executing without explicit tracing")
         result = workflow.invoke(initial_state, config=config)
-        logger.info("[Workflow] Multi-agent execution completed")
+        logger.info("[Workflow] Execution completed")
         return result
 
     except Exception as e:
-        logger.error(f"LangGraph execution failed: {e}")
+        logger.error(f"[Workflow] Execution failed: {e}")
         raise
 
 

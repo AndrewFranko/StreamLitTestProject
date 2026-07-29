@@ -433,3 +433,79 @@ According to the latest st
 [15:33:25.104] [UI] Tool calls: 1
 [15:33:25.112] [SAVE] Chat saved: 9405f1fb (4 messages)
 [15:33:25.114] [AUTO-SAVE] Chat auto-saved
+[16:19:16.103] [LOAD] Chat loaded: 9405f1fb (4 messages)
+[16:19:42.229] [SAVE] Chat saved: 9405f1fb (4 messages)
+[16:19:42.400] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:19:42.403] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:19:42.409] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:19:44.382] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:19:44.386] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:19:44.388] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:19:44.396] [SAVE] Chat saved: 99ef0b07 (0 messages)
+[16:19:44.397] [NEW CHAT] Created: 99ef0b07
+[16:19:44.578] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:19:44.580] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:19:44.583] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:19:59.739] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:19:59.741] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:19:59.744] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:19:59.966] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:19:59.968] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:19:59.971] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:20:00.004] [UI] Creating agent for role: engineer
+[16:20:00.008] [UI] User input: please create a ticket for MX-204 jamming
+[16:20:00.013] [UI] Creating NEW agent for role: engineer
+[16:20:00.103] [UI] Agent ready successfully
+[16:20:03.535] [UI] Agent result received: <class 'dict'>
+[16:20:03.538] [UI] Result success: True
+[16:20:03.547] [UI] Extracted response: I have investigated the status of **MX-204 (Hydraulic Press B)** following your report of jamming.
+
+
+[16:20:03.551] [UI] Tool calls: 3
+[16:20:03.568] [SAVE] Chat saved: 99ef0b07 (2 messages)
+[16:20:03.570] [AUTO-SAVE] Chat auto-saved
+[16:20:03.756] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:20:03.759] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:20:03.762] [ERROR] Failed to load chat 99ef0b07.json: 'charmap' codec can't decode byte 0x8f in position 1084: character maps to <undefined>
+[16:20:03.763] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:20:28.393] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:20:28.397] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:20:28.400] [ERROR] Failed to load chat 99ef0b07.json: 'charmap' codec can't decode byte 0x8f in position 1084: character maps to <undefined>
+[16:20:28.402] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:20:28.432] [APPROVAL] User approved action - Processing with agent...
+[16:20:28.433] [APPROVAL] Sending '✅ Approved' to agent
+[16:20:30.350] [APPROVAL] Agent response: I have investigated the status of **MX-204 (Hydraulic Press B)** following your report of jamming.
+
+
+[16:20:30.354] [SAVE] Chat saved: 99ef0b07 (4 messages)
+[16:20:30.485] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:20:30.488] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:20:30.489] [ERROR] Failed to load chat 99ef0b07.json: 'charmap' codec can't decode byte 0x8f in position 1084: character maps to <undefined>
+[16:20:30.491] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[16:54:46.931] [ERROR] Failed to load chat 5154492e.json: 'charmap' codec can't decode byte 0x8f in position 1002: character maps to <undefined>
+[16:54:46.934] [ERROR] Failed to load chat 7b39908c.json: 'charmap' codec can't decode byte 0x8f in position 3356: character maps to <undefined>
+[16:54:46.938] [ERROR] Failed to load chat 99ef0b07.json: 'charmap' codec can't decode byte 0x8f in position 1084: character maps to <undefined>
+[16:54:46.941] [ERROR] Failed to load chat d67f2ee1.json: 'charmap' codec can't decode byte 0x8f in position 1389: character maps to <undefined>
+[11:28:44.434] [LOAD] Chat loaded: 9405f1fb (4 messages)
+[11:28:48.987] [UI] Creating agent for role: operator
+[11:28:48.990] [UI] User input: hey
+[11:28:48.992] [UI] Creating NEW agent for role: operator
+[11:28:49.050] [UI] Agent ready successfully
+[11:28:49.894] [UI] Agent result received: <class 'dict'>
+[11:28:49.897] [UI] Result success: True
+[11:28:49.899] [UI] Extracted response: Hello! How can I help you on the floor today? Are you checking on a specific machine, or is there an
+[11:28:49.903] [UI] Tool calls: 0
+[11:28:49.909] [SAVE] Chat saved: 9405f1fb (6 messages)
+[11:28:49.911] [AUTO-SAVE] Chat auto-saved
+[11:39:27.835] [SAVE] Chat saved: b6a652cb (0 messages)
+[11:39:27.837] [NEW CHAT] Created: b6a652cb
+[11:39:35.108] [UI] Creating agent for role: operator
+[11:39:35.109] [UI] User input: hey
+[11:39:35.110] [UI] Creating NEW agent for role: operator
+[11:39:35.170] [UI] Agent ready successfully
+[11:39:35.919] [UI] Agent result received: <class 'dict'>
+[11:39:35.921] [UI] Result success: True
+[11:39:35.922] [UI] Extracted response: Hello! How can I help you on the floor today? Are you checking on a specific machine, or is there an
+[11:39:35.923] [UI] Tool calls: 0
+[11:39:35.927] [SAVE] Chat saved: b6a652cb (2 messages)
+[11:39:35.928] [AUTO-SAVE] Chat auto-saved

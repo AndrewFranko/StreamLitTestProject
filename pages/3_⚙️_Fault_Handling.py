@@ -87,6 +87,13 @@ if run_button and user_input.strip():
     try:
         with st.spinner("Running fault handling workflow..."):
             result = execute_workflow(user_input)
+
+        # ALWAYS ASK FOR APPROVAL - show details first, then approval buttons
+        st.session_state.pending_fault_approval = {
+            "input": user_input,
+            "result": result,
+            "timestamp": datetime.now().isoformat()
+        }
     except ImportError as e:
         st.error(f"[ERROR] Workflow import failed: {e}")
         st.info("Please restart the app and try again.")
@@ -96,13 +103,6 @@ if run_button and user_input.strip():
         import traceback
         st.code(traceback.format_exc())
         st.stop()
-
-        # ALWAYS ASK FOR APPROVAL - show details first, then approval buttons
-        st.session_state.pending_fault_approval = {
-            "input": user_input,
-            "result": result,
-            "timestamp": datetime.now().isoformat()
-        }
 
 # ============================================================================
 # SHOW WORKFLOW DETAILS (for review before approval)

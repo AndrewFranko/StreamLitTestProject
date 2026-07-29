@@ -32,9 +32,9 @@ except ImportError as e:
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 
-from config import settings
-from tools import get_all_tools, ConversationMemory
-from guardrails_middleware_layer import (
+from src.config import settings
+from src.tools import get_all_tools, ConversationMemory
+from src.guardrails_middleware_layer import (
     create_agent_with_middleware,
     InputValidationMiddleware,
     ToolInputValidationMiddleware,

@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field, validator
 from enum import Enum
 
 # Import MCP ticket server
-from mcp_ticket_server import (
+from src.mcp_ticket_server import (
     create_ticket as mcp_create_ticket,
     get_tickets_by_machine,
     get_all_tickets,
