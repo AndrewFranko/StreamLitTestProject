@@ -2,7 +2,7 @@
 # Python 3.10+
 
 # Core LLM & LangChain (2026 versions - Pure LangChain, no LangGraph)
-langchain==0.2.8
+langchain==0.3.6
 langchain-google-genai==4.3.2
 google-generativeai==0.5.4
 
