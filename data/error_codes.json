@@ -1,0 +1,58 @@
+[
+  {
+    "code": "E01",
+    "severity": "low",
+    "description": "Temperature sensor drift detected",
+    "symptom": "Temperature readings may be inaccurate",
+    "recommended_action": "Calibrate sensor, continue operation with caution"
+  },
+  {
+    "code": "E17",
+    "severity": "high",
+    "description": "Hydraulic pressure loss in main cylinder",
+    "symptom": "Machine unable to generate full clamping force",
+    "recommended_action": "Inspect hydraulic lines, check pump pressure, possible seal replacement"
+  },
+  {
+    "code": "E23",
+    "severity": "medium",
+    "description": "Spindle bearing vibration exceeds threshold",
+    "symptom": "Unusual noise from spindle, surface finish degradation",
+    "recommended_action": "Check bearing wear, lubrication level, spindle balance"
+  },
+  {
+    "code": "E34",
+    "severity": "critical",
+    "description": "Motor overload protection triggered",
+    "symptom": "Machine suddenly stopped, will not restart",
+    "recommended_action": "Check for mechanical jam, motor burnout risk, immediate service required"
+  },
+  {
+    "code": "E42",
+    "severity": "medium",
+    "description": "Encoder position drift detected",
+    "symptom": "Positioning accuracy off by >0.5mm",
+    "recommended_action": "Recalibrate encoder, inspect mechanical linkage"
+  },
+  {
+    "code": "E56",
+    "severity": "low",
+    "description": "Coolant level low",
+    "symptom": "Coolant warning light on",
+    "recommended_action": "Refill coolant reservoir, inspect for leaks"
+  },
+  {
+    "code": "E78",
+    "severity": "high",
+    "description": "Conveyor belt slip detected",
+    "symptom": "Belt slipping under load, reduced throughput",
+    "recommended_action": "Increase belt tension, inspect for wear, replace if necessary"
+  },
+  {
+    "code": "E99",
+    "severity": "critical",
+    "description": "Emergency stop activated",
+    "symptom": "Machine halted, e-stop button engaged",
+    "recommended_action": "Check for safety hazard, investigate trigger reason, reset e-stop"
+  }
+]

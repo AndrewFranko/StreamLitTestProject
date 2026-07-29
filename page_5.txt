@@ -1,0 +1,26 @@
+5. Recommend the required maintenance action.
+6. Ask the user to confirm.
+7. Create a simulated maintenance request.
+This is intentionally a machine fault-handling workflow, not a complete
+predictive-maintenance platform.
+1. Fault Analysis Agent
+Responsibilities
+● Extract machine ID
+● Extract error code
+● Identify the requested action
+● Determine whether information is missing
+Structured Output
+None
+● {
+● "machine_id": "MX-204",
+● "error_code": "E17",
+● "request_type": "Maintenance Request",
+● "missing_fields": []
+}
+2. Maintenance Diagnosis Agent
+Responsibilities
+● Search machine information from a provided JSON file
+● Check error details from another JSON file
+● Determine issue severity
+● Recommend the required maintenance action
+Tools

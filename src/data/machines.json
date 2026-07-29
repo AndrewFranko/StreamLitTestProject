@@ -1,0 +1,64 @@
+{
+  "machines": [
+    {
+      "id": "MX-201",
+      "name": "CNC Lathe Pro 3000",
+      "model": "HAAS VL3",
+      "location": "Plant A, Bay 1",
+      "status": "running",
+      "last_maintenance_date": "2026-07-15T08:30:00Z",
+      "current_error_codes": [],
+      "uptime_percentage": 98.5,
+      "production_target": 150,
+      "production_actual": 148
+    },
+    {
+      "id": "MX-204",
+      "name": "Hydraulic Press XL",
+      "model": "AMADA HG-3013",
+      "location": "Plant A, Bay 2",
+      "status": "error",
+      "last_maintenance_date": "2026-07-10T10:15:00Z",
+      "current_error_codes": ["E17"],
+      "uptime_percentage": 85.2,
+      "production_target": 120,
+      "production_actual": 102
+    },
+    {
+      "id": "MX-308",
+      "name": "Robotic Welder Assembly",
+      "model": "ABB IRB 6700",
+      "location": "Plant B, Bay 3",
+      "status": "running",
+      "last_maintenance_date": "2026-07-18T14:45:00Z",
+      "current_error_codes": [],
+      "uptime_percentage": 99.1,
+      "production_target": 200,
+      "production_actual": 199
+    },
+    {
+      "id": "MX-415",
+      "name": "Sheet Metal Stamper",
+      "model": "Trumpf TruLaser 3040",
+      "location": "Plant B, Bay 4",
+      "status": "maintenance",
+      "last_maintenance_date": "2026-07-22T09:00:00Z",
+      "current_error_codes": ["E05"],
+      "uptime_percentage": 92.3,
+      "production_target": 180,
+      "production_actual": 166
+    },
+    {
+      "id": "MX-521",
+      "name": "Surface Grinding Station",
+      "model": "Cincinnati Milacron Sabre",
+      "location": "Plant C, Bay 5",
+      "status": "idle",
+      "last_maintenance_date": "2026-07-20T11:30:00Z",
+      "current_error_codes": [],
+      "uptime_percentage": 100.0,
+      "production_target": 90,
+      "production_actual": 0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+Technical Focus
+● Agents
+● Tool Calling
+● LangGraph
+● MCP Concepts
+● Multi-step Reasoning
+● Human-in-the-loop
+Learners Build
+Convert yesterday's chatbot into an Agent.
+Create tools like:
+● Machine Status Checker
+● Error Code Lookup
+● Maintenance Ticket Generator
+● Technician Availability Checker
+The agent should decide which tool or tools to invoke based on the user's request.
+Stretch Challenge
+If a machine failure is marked as critical, the assistant should ask for supervisor approval before
+creating a shutdown request.
+Level 3 : Simplified Multi-Agent Architecture
+A user submits:
+“Machine MX-204 has stopped with error code E17. Check the issue and
+create a maintenance request.”
+The system should:
+1. Understand the machine issue.
+2. Retrieve machine details.
+3. Check the meaning of the error code.
+4. Determine the issue severity.

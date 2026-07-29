@@ -1,0 +1,30 @@
+Operators frequently ask questions regarding:
+● Machine operating procedures
+● Error codes
+● Safety checks
+● Production targets
+● Shift handover instructions
+Maintenance
+Maintenance teams manually handle:
+● Machine fault reporting
+● Technician assignment
+● Maintenance ticket creation
+● Downtime tracking
+Production Management
+Supervisors spend significant time:
+● Checking machine status
+● Reviewing downtime
+● Coordinating maintenance
+● Preparing shift summaries
+Executive Goals
+The COO expects:
+● Reduced machine downtime
+● Faster maintenance response
+● Better operator productivity
+● Improved production visibility
+● AI-assisted plant operations
+Level 1 : Build an AI Manufacturing Assistant
+Machine operators frequently need help with basic operating procedures, machine issues, and
+safety checks.
+The factory wants a conversational AI assistant capable of answering general
+manufacturing-related questions.

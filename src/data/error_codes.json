@@ -1,0 +1,84 @@
+{
+  "error_codes": [
+    {
+      "code": "E01",
+      "description": "Power supply failure",
+      "severity": "high",
+      "recommended_action": "Check main power connection. Verify circuit breaker status. Test power supply unit.",
+      "common_causes": ["Blown fuse", "Loose power cable", "Power supply malfunction"],
+      "requires_shutdown": true
+    },
+    {
+      "code": "E02",
+      "description": "Emergency stop activated",
+      "severity": "high",
+      "recommended_action": "Reset emergency stop button. Check for hazard conditions before restarting.",
+      "common_causes": ["Manual emergency stop", "Safety interlock triggered"],
+      "requires_shutdown": true
+    },
+    {
+      "code": "E03",
+      "description": "Spindle speed error",
+      "severity": "medium",
+      "recommended_action": "Recalibrate speed sensor. Check spindle bearing lubrication. Verify motor connection.",
+      "common_causes": ["Speed sensor drift", "Belt slippage", "Motor bearing wear"],
+      "requires_shutdown": false
+    },
+    {
+      "code": "E04",
+      "description": "Coolant temperature high",
+      "severity": "medium",
+      "recommended_action": "Check coolant level and circulation. Clean coolant filter. Verify chiller operation.",
+      "common_causes": ["Low coolant level", "Clogged filter", "Chiller malfunction"],
+      "requires_shutdown": false
+    },
+    {
+      "code": "E05",
+      "description": "Hydraulic pressure low",
+      "severity": "high",
+      "recommended_action": "Check hydraulic fluid level and refill. Inspect pump for leaks. Test pressure relief valve.",
+      "common_causes": ["Fluid leak", "Pump failure", "Pressure relief setting"],
+      "requires_shutdown": true
+    },
+    {
+      "code": "E06",
+      "description": "Axis limit reached",
+      "severity": "medium",
+      "recommended_action": "Reset axis position to home. Check mechanical limits. Verify homing procedure.",
+      "common_causes": ["Over-travel", "Limit switch malfunction", "Software error"],
+      "requires_shutdown": false
+    },
+    {
+      "code": "E07",
+      "description": "Tool changer malfunction",
+      "severity": "medium",
+      "recommended_action": "Manual tool change. Check tool changer mechanical operation. Verify sensor alignment.",
+      "common_causes": ["Motor failure", "Sensor misalignment", "Tool holder debris"],
+      "requires_shutdown": false
+    },
+    {
+      "code": "E08",
+      "description": "Drive belt wear detected",
+      "severity": "low",
+      "recommended_action": "Schedule belt replacement. Monitor belt tension. Check for contamination.",
+      "common_causes": ["Normal wear", "Over-tensioning", "Misalignment"],
+      "requires_shutdown": false
+    },
+    {
+      "code": "E09",
+      "description": "Vibration threshold exceeded",
+      "severity": "high",
+      "recommended_action": "Stop operation immediately. Check for loose components. Balance rotating parts. Inspect bearings.",
+      "common_causes": ["Imbalanced load", "Bearing failure", "Loose fasteners"],
+      "requires_shutdown": true
+    },
+    {
+      "code": "E10",
+      "description": "Door interlock open",
+      "severity": "high",
+      "recommended_action": "Close machine door. Check for obstructions. Verify door switch operation.",
+      "common_causes": ["Door not fully closed", "Switch malfunction", "Mechanical misalignment"],
+      "requires_shutdown": true
+    }
+  ]
+}

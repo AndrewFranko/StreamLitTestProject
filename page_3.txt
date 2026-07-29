@@ -1,0 +1,31 @@
+At this stage, there is no machine or maintenance system integration. The assistant behaves
+like a capable LLM-powered chatbot.
+Technical Focus
+● LLM Integration
+● Prompt Engineering
+● Chat Interface
+● Conversation Memory
+● System Prompts
+● Message History
+● Basic LangChain Components
+Learners Build
+● Chat UI
+● Conversation History
+● Manufacturing Assistant Persona
+● Prompt Templates
+● Basic Guardrails
+● Session Memory
+Stretch Challenge
+Different users should receive different responses depending on whether they are:
+● Machine Operator
+● Maintenance Engineer
+● Production Supervisor
+Level 2 : Transform the Assistant into an AI Agent
+The assistant should now perform actions, not just answer manufacturing questions.
+Examples:
+● Check Machine Status
+● Retrieve Error Details
+● Create Maintenance Ticket
+● Check Technician Availability
+● Generate Shift Summary
+● Escalate Critical Machine Failure

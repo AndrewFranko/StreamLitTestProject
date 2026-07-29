@@ -1,0 +1,27 @@
+FactoryOps AI – Building an Intelligent Manufacturing
+Assistant
+Your team at GlobalLogic has been hired by FactoryOps Manufacturing to build an
+AI-powered Manufacturing Assistant for machine operators, maintenance engineers, production
+supervisors, and plant managers.
+The client doesn't want a finished product immediately. They want an MVP that grows over
+multiple phases. Your job is to implement those phases while adapting to new business
+requirements.
+The same application evolves across multiple levels.
+Client Profile
+Organization
+FactoryOps Manufacturing
+● 5 Manufacturing Plants
+● 3,500 Employees
+● 250 Production Machines
+● 24x7 Production Operations
+● Multiple Product Lines
+Existing Technology Landscape
+● Manufacturing Execution System
+● Machine Monitoring Dashboard
+● Maintenance Management System
+● Inventory Management System
+● Quality Inspection Portal
+● Email & Teams
+● REST APIs for internal systems
+Current Business Challenges
+Machine Operations

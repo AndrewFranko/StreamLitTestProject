@@ -1,0 +1,33 @@
+{
+  "id": "d67f2ee1",
+  "name": "Chat - 2026-07-28 14:26",
+  "role": "Engineer",
+  "created": "2026-07-28T14:26:13.442541",
+  "last_updated": "2026-07-28T14:29:24.763373",
+  "messages": [
+    {
+      "role": "user",
+      "content": "what is my name"
+    },
+    {
+      "role": "agent",
+      "content": "I am your Manufacturing Assistant, here to help you with machine diagnostics, maintenance scheduling, and technical support. I don't have access to your personal name unless you share it with me, but I am ready to assist you with your equipment and maintenance tasks.\n\nHow can I help you today? Are there any machines needing attention or error codes you need me to investigate?"
+    },
+    {
+      "role": "user",
+      "content": "Please create ticket for mashine MX-201 for jamming"
+    },
+    {
+      "role": "agent",
+      "content": "I have initiated the process to create a maintenance ticket for machine **MX-201 (CNC Milling Machine A)** regarding the reported jamming issue.\n\nI have checked the status of the machine, and it is currently listed as **operational** with a temperature of 72°C. I have also verified that there is no existing ticket history for this machine.\n\nA request for approval has been submitted to create a **medium-priority** maintenance ticket. Please review and approve the request to proceed with the ticket creation.\n\n⏳ *Awaiting your approval to proceed...*"
+    },
+    {
+      "role": "user",
+      "content": "✅ Approved"
+    },
+    {
+      "role": "agent",
+      "content": "I have initiated the process to create a maintenance ticket for machine **MX-201 (CNC Milling Machine A)** regarding the reported jamming issue.\n\nI have checked the status of the machine, and it is currently listed as **operational** with a temperature of 72°C. I have also verified that there is no existing ticket history for this machine.\n\nA request for approval has been submitted to create a **medium-priority** maintenance ticket. Please review and approve the request to proceed with the ticket creation."
+    }
+  ]
+}

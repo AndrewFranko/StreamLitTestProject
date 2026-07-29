@@ -1,0 +1,14 @@
+{
+  "role": "Engineer",
+  "last_updated": "2026-07-28T12:34:32.729227",
+  "messages": [
+    {
+      "role": "user",
+      "content": "test"
+    },
+    {
+      "role": "agent",
+      "content": "Hello! It seems you are testing the system. I am your Manufacturing Assistant, ready to help you with equipment diagnostics, maintenance scheduling, and technical support.\n\nHow can I assist you with your machinery today? If you have a specific machine ID you are concerned about or need help with a maintenance task, please let me know."
+    }
+  ]
+}

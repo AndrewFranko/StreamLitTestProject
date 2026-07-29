@@ -1,0 +1,283 @@
+================================================================================
+FACTORYOPS AI - START HERE
+================================================================================
+
+WELCOME! Your FactoryOps AI Manufacturing Assistant is ready to deploy locally.
+
+This file tells you EVERYTHING you need to start using the application.
+
+================================================================================
+QUICK START (WINDOWS)
+================================================================================
+
+1. Open Command Prompt
+   - Press Windows + R
+   - Type: cmd
+   - Press Enter
+
+2. Navigate to the project
+   cd c:\StreamLit
+
+3. Run the startup script
+   run.bat
+
+4. Wait for this message to appear
+   "Local URL: http://localhost:8501"
+
+5. Open your browser and go to
+   http://localhost:8501
+
+6. You're done! Start chatting with the AI assistant.
+
+================================================================================
+QUICK START (MAC/LINUX)
+================================================================================
+
+1. Open Terminal
+
+2. Navigate to the project
+   cd /path/to/StreamLit
+
+3. Make the script executable
+   chmod +x run.sh
+
+4. Run the startup script
+   ./run.sh
+
+5. Wait for this message to appear
+   "Local URL: http://localhost:8501"
+
+6. Open your browser and go to
+   http://localhost:8501
+
+7. You're done! Start chatting with the AI assistant.
+
+================================================================================
+WHAT YOU CAN DO
+================================================================================
+
+The application has 4 different AI personas, each designed for different users:
+
+1. OPERATOR (for machine operators)
+   - Get quick answers about error codes
+   - Learn safe operating procedures
+   - Report issues to maintenance
+   Example: "What does error E17 mean?"
+
+2. ENGINEER (for maintenance technicians)
+   - Get detailed diagnostic procedures
+   - Understand root causes of problems
+   - Get parts and specifications
+   Example: "How do I fix machine MX-204?"
+
+3. SUPERVISOR (for production supervisors)
+   - Check real-time machine status
+   - Track downtime and production impact
+   - Coordinate maintenance resources
+   Example: "Are technicians available right now?"
+
+4. MANAGER (for plant managers)
+   - Get strategic operational insights
+   - View plant-wide KPIs and trends
+   - Get optimization recommendations
+   Example: "What's our plant status today?"
+
+To switch roles: Use the dropdown menu in the left sidebar
+
+================================================================================
+TEST IT OUT
+================================================================================
+
+Try these sample questions to see the AI in action:
+
+AS OPERATOR:
+  "What is error code E17?"
+  "How do I safely operate machine MX-101?"
+  "Should I report this to maintenance?"
+
+AS ENGINEER:
+  "Check machine MX-204"
+  "What causes error E23?"
+  "What parts do I need?"
+
+AS SUPERVISOR:
+  "Are technicians available?"
+  "What's down right now?"
+  "Create maintenance ticket for MX-310"
+
+AS MANAGER:
+  "Plant status report"
+  "What machines need attention?"
+  "Resource utilization summary"
+
+================================================================================
+AVAILABLE MACHINES
+================================================================================
+
+MX-101: Assembly Line 1 (Plant A)
+  Status: RUNNING
+
+MX-204: Press Machine (Plant B)
+  Status: ERROR - E17 (Hydraulic pressure low)
+
+MX-310: Welding Station (Plant A)
+  Status: IDLE
+
+MX-405: Packaging Unit (Plant C)
+  Status: RUNNING
+
+MX-502: Quality Inspector (Plant B)
+  Status: RUNNING
+
+================================================================================
+AVAILABLE TECHNICIANS
+================================================================================
+
+John Smith - Hydraulic Specialist
+  Status: AVAILABLE
+
+Sarah Johnson - Electrical Specialist
+  Status: AVAILABLE
+
+Mike Davis - Mechanical Specialist
+  Status: BUSY (3 tasks in progress)
+
+================================================================================
+ERROR CODES IN SYSTEM
+================================================================================
+
+E17 - Hydraulic pressure low
+  Severity: HIGH
+  Fix: Check hydraulic fluid level and refill
+
+E23 - Motor overheating
+  Severity: HIGH
+  Fix: Cool motor and check cooling system
+
+E45 - Sensor malfunction
+  Severity: MEDIUM
+  Fix: Recalibrate sensor
+
+================================================================================
+KEY FEATURES
+================================================================================
+
+Role-Based AI Responses
+  The AI changes its personality based on your selected role.
+  Operators get simple answers. Engineers get technical details.
+
+Tool-Powered Intelligence
+  The AI can:
+  - Check machine status and history
+  - Explain what errors mean
+  - Find available technicians
+  - Create maintenance work orders
+
+Human Approval for Critical Actions
+  When you ask to create a maintenance ticket, you get to approve it first.
+  This prevents accidental ticket creation.
+
+Chat History
+  Each conversation is saved in the current session.
+  History clears when you switch roles.
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Q: Nothing happens when I click Send
+A: The AI is processing. Give it 3-5 seconds. Slower networks may take longer.
+
+Q: "Port 8501 already in use" error
+A: Another app is using that port. Run on a different port:
+   streamlit run src/ui/app.py --server.port 8502
+
+Q: "Module not found" errors
+A: The startup script should install everything. If not:
+   pip install -r requirements.txt
+
+Q: API key errors
+A: Your .env file should have the GOOGLE_API_KEY. Check that it exists.
+
+Q: App won't start
+A: Make sure Python 3.10+ is installed:
+   python --version
+
+   Install from: https://www.python.org
+
+Q: Page is blank or won't load
+A: Hard refresh your browser:
+   Windows: Ctrl + Shift + R
+   Mac: Cmd + Shift + R
+
+================================================================================
+STOPPING THE APPLICATION
+================================================================================
+
+To stop the Streamlit server:
+
+1. Go back to the Command Prompt / Terminal where it's running
+2. Press Ctrl + C
+3. Type Y to confirm
+
+The web interface will stop responding after this.
+
+To restart, just run the startup script again.
+
+================================================================================
+GETTING HELP
+================================================================================
+
+For detailed setup instructions:
+  Open: SETUP.md (in the StreamLit folder)
+
+For full deployment checklist:
+  Open: DEPLOYMENT_CHECKLIST.md (in the StreamLit folder)
+
+For comprehensive status report:
+  Open: DEPLOYMENT_STATUS.txt (in the StreamLit folder)
+
+================================================================================
+WHAT'S INSTALLED
+================================================================================
+
+The application uses:
+  - LangChain (for AI agent framework)
+  - Google Gemini API (for the AI model)
+  - Streamlit (for the web interface)
+
+You don't need to install anything else. The startup script handles it all.
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+- This is a DEVELOPMENT version
+- Data is stored in JSON files locally
+- Chat history is NOT saved between sessions
+- Tickets are saved to src/data/tickets.json
+- All data is test/mock data (not real production data)
+- Internet connection required (for Gemini API calls)
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Run the startup script (run.bat or run.sh)
+2. Open http://localhost:8501 in your browser
+3. Try a sample query
+4. Switch roles and try different questions
+5. Test creating a maintenance ticket
+6. Read the documentation for more details
+
+================================================================================
+YOU'RE ALL SET!
+================================================================================
+
+Everything is configured and ready to go.
+
+Happy manufacturing!
+
+Questions? Check the documentation files in the StreamLit folder.
+
+================================================================================

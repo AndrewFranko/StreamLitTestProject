@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "level3_workflow": "./langgraph_app.py:graph"
+  },
+  "env": ".env"
+}
