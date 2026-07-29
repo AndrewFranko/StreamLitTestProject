@@ -14,9 +14,9 @@ Your server now implements the **LangGraph Server API Protocol (2026)** with ful
 
 **FastAPI Server Running At:**
 ```
-http://localhost:9000
+http://localhost:5555
 ```
-*(Note: Moved from 8080 due to zombie socket on Windows)*
+*(Note: Port 5555 avoids socket conflicts. CORS catch-all disabled to allow all routes.)*
 
 **Streamlit App Running At:**
 ```
@@ -35,7 +35,37 @@ Project: Factory
 
 ### ✅ Graph Introspection Endpoints (NOW WORKING!)
 
-**4. GET /graph/mermaid** - Returns actual Mermaid diagram of workflow
+These endpoints fix the "empty screen" issue in LangGraph Studio:
+
+**3. GET /assistants/{id}/subgraphs** - Returns subgraph structures (required for nested display)
+```json
+{
+  "subgraphs": [
+    {
+      "id": "fault_analysis",
+      "namespace": ["fault_analysis"],
+      "schema": { ... }
+    },
+    { ... }
+  ]
+}
+```
+- Status: ✅ HTTP 200
+
+**4. GET /assistants/{id}/nodes/{node_id}** - Returns individual node schemas (for node inspection)
+```json
+{
+  "id": "fault_analysis",
+  "label": "Fault Analysis Agent",
+  "type": "agent",
+  "description": "Extracts machine_id and error_code from user input",
+  "input_schema": { ... },
+  "output_schema": { ... }
+}
+```
+- Status: ✅ HTTP 200
+
+**5. GET /graph/mermaid** - Returns actual Mermaid diagram of workflow
 ```json
 {
   "format": "mermaid",
@@ -43,7 +73,7 @@ Project: Factory
 }
 ```
 
-**5. GET /assistants/{id}/graph** - Returns graph structure with node/edge topology
+**6. GET /assistants/{id}/graph** - Returns graph structure with node/edge topology
 - Extracts from compiled workflow
 - Fallback to manual structure if extraction fails
 - Status: ✅ HTTP 200
@@ -178,7 +208,8 @@ Execute the workflow with input.
 ### **Option A: LangGraph Studio (Recommended)**
 
 1. Go to: `https://smith.langchain.com/studio` (or EU: `https://eu.smith.langchain.com/studio`)
-2. Enter endpoint: `http://localhost:9000`
+2. Enter endpoint: `http://localhost:5555`
+3. **Now you should see** the complete 3-agent workflow diagram!
 3. Studio will:
    - Fetch assistants from `/assistants/search`
    - Load graph topology from `/assistants/{id}/graph`
@@ -188,18 +219,27 @@ Execute the workflow with input.
 
 ```bash
 # Test the server
-curl http://localhost:9000/health
+curl http://localhost:5555/health
 
 # Get workflow diagram
-curl http://localhost:9000/graph/mermaid
+curl http://localhost:5555/graph/mermaid
+
+# Get graph list
+curl http://localhost:5555/graphs
+
+# Get node details (Studio uses this)
+curl http://localhost:5555/assistants/level3_workflow/nodes/diagnosis
+
+# Get subgraphs (Studio uses this)
+curl "http://localhost:5555/assistants/level3_workflow/subgraphs?recurse=true"
 
 # Invoke workflow
-curl -X POST http://localhost:9000/invoke \
+curl -X POST http://localhost:5555/invoke \
   -H "Content-Type: application/json" \
   -d '{"input": "Machine MX-204 error E17"}'
 
 # Get assistant info
-curl -X POST http://localhost:9000/assistants/search
+curl -X POST http://localhost:5555/assistants/search
 ```
 
 ### **Option C: Streamlit App (UI)**
