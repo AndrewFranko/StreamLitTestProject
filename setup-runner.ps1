@@ -17,14 +17,14 @@ function Write-Success {
     Write-Host "✓ $Message" -ForegroundColor Green
 }
 
-function Write-Error-Custom {
+function Write-ErrorCustom {
     param([string]$Message)
     Write-Host "✗ $Message" -ForegroundColor Red
 }
 
 # Check if running as Administrator
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error-Custom "This script must be run as Administrator!"
+    Write-ErrorCustom "This script must be run as Administrator!"
     exit 1
 }
 
@@ -42,7 +42,7 @@ $ARCH = if ([Environment]::Is64BitProcess) { "x64" } else { "x86" }
 Write-Step "Collecting configuration..."
 
 if ([string]::IsNullOrEmpty($RepoUrl)) {
-    $RepoUrl = Read-Host "Enter your GitHub repository URL (e.g., https://github.com/username/repo)"
+    $RepoUrl = Read-Host "Enter your GitHub repository URL"
 }
 
 if ([string]::IsNullOrEmpty($Token)) {
@@ -50,7 +50,10 @@ if ([string]::IsNullOrEmpty($Token)) {
     $Token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($Token))
 }
 
-$RunnerName = Read-Host "Enter a name for this runner (default: streamlit-deployment-runner)" -DefaultValue $RunnerName
+$RunnerNameInput = Read-Host "Enter a name for this runner (default: streamlit-deployment-runner)"
+if (-not [string]::IsNullOrEmpty($RunnerNameInput)) {
+    $RunnerName = $RunnerNameInput
+}
 
 # Create runner directory
 Write-Step "Creating runner directory..."
@@ -80,7 +83,7 @@ else {
         Write-Success "Downloaded runner"
     }
     catch {
-        Write-Error-Custom "Failed to download runner: $_"
+        Write-ErrorCustom "Failed to download runner: $_"
         exit 1
     }
 }
@@ -94,7 +97,7 @@ try {
     Write-Success "Runner extracted"
 }
 catch {
-    Write-Error-Custom "Failed to extract runner: $_"
+    Write-ErrorCustom "Failed to extract runner: $_"
     exit 1
 }
 
@@ -114,7 +117,7 @@ Write-Host ""
     --work "_work"
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error-Custom "Failed to configure runner"
+    Write-ErrorCustom "Failed to configure runner"
     exit 1
 }
 
@@ -128,7 +131,7 @@ try {
     Write-Success "Service installed"
 }
 catch {
-    Write-Error-Custom "Failed to install service: $_"
+    Write-ErrorCustom "Failed to install service: $_"
     exit 1
 }
 
@@ -140,7 +143,7 @@ try {
     Write-Success "Service started"
 }
 catch {
-    Write-Error-Custom "Failed to start service: $_"
+    Write-ErrorCustom "Failed to start service: $_"
     exit 1
 }
 
