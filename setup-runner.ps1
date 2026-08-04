@@ -42,17 +42,18 @@ $ARCH = if ([Environment]::Is64BitProcess) { "x64" } else { "x86" }
 Write-Step "Collecting configuration..."
 
 if ([string]::IsNullOrEmpty($RepoUrl)) {
-    $RepoUrl = Read-Host "Enter your GitHub repository URL"
+    $prompt = 'Enter your GitHub repository URL (e.g., https://github.com/username/repo)'
+    $RepoUrl = Read-Host $prompt
 }
 
 if ([string]::IsNullOrEmpty($Token)) {
-    $Token = Read-Host "Enter your GitHub Personal Access Token or Runner Registration Token" -AsSecureString
+    $Token = Read-Host 'Enter your GitHub Personal Access Token' -AsSecureString
     $Token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($Token))
 }
 
-$RunnerNameInput = Read-Host "Enter a name for this runner (default: streamlit-deployment-runner)"
-if (-not [string]::IsNullOrEmpty($RunnerNameInput)) {
-    $RunnerName = $RunnerNameInput
+$inputName = Read-Host 'Enter runner name (default: streamlit-deployment-runner)'
+if (-not [string]::IsNullOrEmpty($inputName)) {
+    $RunnerName = $inputName
 }
 
 # Create runner directory
@@ -162,7 +163,7 @@ Write-Host "1. Verify the runner is online in GitHub:"
 Write-Host "   Settings → Actions → Runners (in your repository)"
 Write-Host ""
 Write-Host "2. Check runner status:"
-Write-Host "   & '.\svc.cmd' status"
+Write-Host '   .\svc.cmd status'
 Write-Host ""
 Write-Host "3. View Event Viewer logs for the service:"
 Write-Host "   Event Viewer → Windows Logs → Application"
