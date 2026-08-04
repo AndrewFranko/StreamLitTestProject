@@ -81,13 +81,20 @@ catch {
 Write-Step "Extracting runner files"
 
 try {
-    # Try using Expand-Archive (more reliable on modern PowerShell)
-    Expand-Archive -Path $ZipFile -DestinationPath "." -Force
+    # Use tar command (available on Windows 10+) as it's more reliable than Expand-Archive
+    tar -xzf $ZipFile
     Write-Success "Runner extracted"
 }
 catch {
-    Write-ErrorCustom "Failed to extract runner: $_"
-    exit 1
+    Write-Host "TAR failed, trying Expand-Archive..."
+    try {
+        Expand-Archive -Path $ZipFile -DestinationPath "." -Force
+        Write-Success "Runner extracted with Expand-Archive"
+    }
+    catch {
+        Write-ErrorCustom "Failed to extract runner: $_"
+        exit 1
+    }
 }
 
 Write-Step "Configuring the runner"
