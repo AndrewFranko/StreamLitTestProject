@@ -9,11 +9,19 @@ Uses Pydantic BaseSettings for flexible configuration management.
 """
 
 import os
-import tomllib
+import sys
 from pathlib import Path
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 import logging
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    try:
+        import tomli as tomllib
+    except ImportError:
+        tomllib = None
 
 logger = logging.getLogger(__name__)
 
