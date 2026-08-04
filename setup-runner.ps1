@@ -30,6 +30,11 @@ Write-Host ""
 $RUNNER_VERSION = "2.319.0"
 $RUNNER_DIR = "$env:USERPROFILE\github-runner"
 $ARCH = if ([Environment]::Is64BitProcess) { "x64" } else { "x86" }
+$CURRENT_DIR = Get-Location
+
+Write-Host "Current directory: $CURRENT_DIR" -ForegroundColor Yellow
+Write-Host "Runner will be installed to: $RUNNER_DIR" -ForegroundColor Yellow
+Write-Host ""
 
 Write-Step "Collecting configuration"
 
@@ -46,6 +51,31 @@ if (-not [string]::IsNullOrEmpty($inputName)) {
     $RunnerName = $inputName
 }
 
+# Download to current directory
+Write-Step "Downloading GitHub Actions Runner v$RUNNER_VERSION"
+
+$DownloadUrl = "https://github.com/actions/runner/releases/download/v$RUNNER_VERSION/actions-runner-win-$ARCH-$RUNNER_VERSION.zip"
+$ZipFile = "actions-runner-win-$ARCH-$RUNNER_VERSION.zip"
+$ZipPath = Join-Path $CURRENT_DIR $ZipFile
+
+Write-Host "Download location: $ZipPath" -ForegroundColor Yellow
+
+if (Test-Path $ZipPath) {
+    Remove-Item $ZipPath -Force
+    Write-Host "Removed old file"
+}
+
+try {
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $ZipPath -ErrorAction Stop
+    $fileSize = (Get-Item $ZipPath).Length / 1MB
+    Write-Success "Downloaded runner ($([math]::Round($fileSize, 2)) MB)"
+}
+catch {
+    Write-ErrorCustom "Failed to download runner: $_"
+    exit 1
+}
+
+# Create runner directory
 Write-Step "Creating runner directory"
 
 if (-not (Test-Path $RUNNER_DIR)) {
@@ -56,39 +86,18 @@ else {
     Write-Success "Directory already exists"
 }
 
-Set-Location $RUNNER_DIR
-
-Write-Step "Downloading GitHub Actions Runner v$RUNNER_VERSION"
-
-$DownloadUrl = "https://github.com/actions/runner/releases/download/v$RUNNER_VERSION/actions-runner-win-$ARCH-$RUNNER_VERSION.zip"
-$ZipFile = "actions-runner-win-$ARCH-$RUNNER_VERSION.zip"
-
-# Delete old file if it exists (force fresh download)
-if (Test-Path $ZipFile) {
-    Write-Host "Removing old runner archive..."
-    Remove-Item $ZipFile -Force
-}
+# Extract from current directory to runner directory
+Write-Step "Extracting runner files from $ZipPath to $RUNNER_DIR"
 
 try {
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $ZipFile -ErrorAction Stop
-    Write-Success "Downloaded runner"
+    # Use tar to extract
+    tar -xf $ZipPath -C $RUNNER_DIR
+    Write-Success "Runner extracted successfully"
 }
 catch {
-    Write-ErrorCustom "Failed to download runner"
-    exit 1
-}
-
-Write-Step "Extracting runner files"
-
-try {
-    # Use tar command (available on Windows 10+) as it's more reliable than Expand-Archive
-    tar -xzf $ZipFile
-    Write-Success "Runner extracted"
-}
-catch {
-    Write-Host "TAR failed, trying Expand-Archive..."
+    Write-Host "TAR extraction failed, trying Expand-Archive..."
     try {
-        Expand-Archive -Path $ZipFile -DestinationPath "." -Force
+        Expand-Archive -Path $ZipPath -DestinationPath $RUNNER_DIR -Force
         Write-Success "Runner extracted with Expand-Archive"
     }
     catch {
@@ -96,6 +105,9 @@ catch {
         exit 1
     }
 }
+
+# Change to runner directory for configuration
+Set-Location $RUNNER_DIR
 
 Write-Step "Configuring the runner"
 Write-Host "Connecting to: $RepoUrl"
