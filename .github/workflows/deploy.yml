@@ -157,10 +157,8 @@ jobs:
       run: |
         Write-Host "Deploying FactoryOps AI application..."
         New-Item -ItemType Directory -Path "logs" -Force | Out-Null
-
-        # Start the Streamlit app in the background
-        $process = Start-Process -FilePath python -ArgumentList @("-m", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--logger.level=info") -RedirectStandardOutput "logs/app.log" -NoNewWindow -PassThru
-
+        $args = @("-m", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--logger.level=info")
+        $process = Start-Process -FilePath python -ArgumentList $args -RedirectStandardOutput "logs/app.log" -NoNewWindow -PassThru
         Write-Host "Application deployment initiated with PID: $($process.Id)"
         Start-Sleep -Seconds 5
 
