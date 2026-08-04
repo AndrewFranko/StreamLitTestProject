@@ -80,12 +80,12 @@ else {
 Write-Step "Extracting runner files"
 
 try {
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipFile, ".")
+    # Try using Expand-Archive (more reliable on modern PowerShell)
+    Expand-Archive -Path $ZipFile -DestinationPath "." -Force
     Write-Success "Runner extracted"
 }
 catch {
-    Write-ErrorCustom "Failed to extract runner"
+    Write-ErrorCustom "Failed to extract runner: $_"
     exit 1
 }
 
