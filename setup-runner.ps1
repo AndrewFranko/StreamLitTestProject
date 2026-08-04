@@ -39,7 +39,8 @@ if ([string]::IsNullOrEmpty($RepoUrl)) {
 
 if ([string]::IsNullOrEmpty($Token)) {
     $Token = Read-Host "Enter GitHub Personal Access Token" -AsSecureString
-    $Token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($Token))
+    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Token)
+    $Token = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
 }
 
 $inputName = Read-Host "Enter runner name (press Enter for default)"
