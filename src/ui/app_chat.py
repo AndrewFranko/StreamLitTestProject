@@ -93,12 +93,6 @@ if "current_role" not in st.session_state:
     st.session_state.current_role = "Operator"
 
 
-# Show different pages based on selection
-if page == "💬 Chat":
-    show_chat_page()
-elif page == "📊 Conversations":
-    show_conversations_page()
-
 def show_chat_page():
     """Display the main chat interface."""
     # Sidebar: Role selection and controls
@@ -370,3 +364,18 @@ elif send_button and user_input.strip():
             })
             st.error(error_msg)
             st.rerun()
+
+
+def show_conversations_page():
+    """Display saved conversations."""
+    st.title("📊 Saved Conversations")
+    st.markdown("View and manage your saved chat conversations.")
+
+    st.info("Conversations are automatically saved by role. Switch roles in the Chat page to view conversations for different roles.")
+
+
+# Show different pages based on selection
+if page == "💬 Chat":
+    show_chat_page()
+elif page == "📊 Conversations":
+    show_conversations_page()
