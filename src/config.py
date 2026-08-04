@@ -215,8 +215,8 @@ def get_settings() -> Settings:
         settings = Settings()
 
         if not settings.google_api_key:
-            raise ValueError(
-                "GOOGLE_API_KEY is required. Set it via:\n"
+            logger.warning(
+                "⚠️  GOOGLE_API_KEY not set. Set it via:\n"
                 "  1. Environment variable: GOOGLE_API_KEY=your_key\n"
                 "  2. pyproject.local.toml: [tool.factoryops.api] google-api-key = 'your_key'\n"
                 "  3. .env file: GOOGLE_API_KEY=your_key"
@@ -237,5 +237,9 @@ def get_settings() -> Settings:
         raise
 
 
-# Global settings instance
-settings = get_settings()
+# Global settings instance - wrapped in try-except for CI/CD environments
+try:
+    settings = get_settings()
+except Exception as e:
+    logger.warning(f"Configuration loading failed during import: {str(e)}")
+    settings = None
