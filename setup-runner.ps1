@@ -63,18 +63,19 @@ Write-Step "Downloading GitHub Actions Runner v$RUNNER_VERSION"
 $DownloadUrl = "https://github.com/actions/runner/releases/download/v$RUNNER_VERSION/actions-runner-win-$ARCH-$RUNNER_VERSION.zip"
 $ZipFile = "actions-runner-win-$ARCH-$RUNNER_VERSION.zip"
 
+# Delete old file if it exists (force fresh download)
 if (Test-Path $ZipFile) {
-    Write-Success "Runner archive already exists"
+    Write-Host "Removing old runner archive..."
+    Remove-Item $ZipFile -Force
 }
-else {
-    try {
-        Invoke-WebRequest -Uri $DownloadUrl -OutFile $ZipFile -ErrorAction Stop
-        Write-Success "Downloaded runner"
-    }
-    catch {
-        Write-ErrorCustom "Failed to download runner"
-        exit 1
-    }
+
+try {
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $ZipFile -ErrorAction Stop
+    Write-Success "Downloaded runner"
+}
+catch {
+    Write-ErrorCustom "Failed to download runner"
+    exit 1
 }
 
 Write-Step "Extracting runner files"
