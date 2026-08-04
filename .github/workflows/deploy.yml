@@ -143,39 +143,46 @@ jobs:
 
     - name: Stop previous application instance
       continue-on-error: true
+      shell: powershell
       run: |
         # Kill any existing streamlit processes
-        pkill -f "streamlit run" || true
-        echo "Previous instances stopped"
+        Get-Process python -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*streamlit*" } | Stop-Process -Force
+        Write-Host "Previous instances stopped"
 
     - name: Deploy application
+      shell: powershell
       run: |
-        echo "Deploying FactoryOps AI application..."
-        mkdir -p logs
+        Write-Host "Deploying FactoryOps AI application..."
+        New-Item -ItemType Directory -Path "logs" -Force | Out-Null
 
         # Start the Streamlit app in the background
-        nohup streamlit run app.py \
-          --server.port=8501 \
-          --server.address=0.0.0.0 \
-          --logger.level=info \
-          > logs/app.log 2>&1 &
+        $process = Start-Process python -ArgumentList "$(Get-Command streamlit).Source", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--logger.level=info" -RedirectStandardOutput "logs/app.log" -NoNewWindow -PassThru
 
-        # Wait for the app to start
-        sleep 5
-        echo "Application deployment initiated"
+        Write-Host "Application deployment initiated with PID: $($process.Id)"
+        Start-Sleep -Seconds 5
 
     - name: Verify deployment
+      shell: powershell
       run: |
-        # Check if the app is running
-        for i in {1..30}; do
-          if curl -s http://localhost:8501 > /dev/null 2>&1; then
-            echo "✓ Application is running on port 8501"
-            curl -s http://localhost:8501 | head -20
+        Write-Host "Verifying deployment..."
+        $maxRetries = 30
+        $retryCount = 0
+
+        while ($retryCount -lt $maxRetries) {
+          try {
+            $response = Invoke-WebRequest -Uri "http://localhost:8501" -TimeoutSec 5 -ErrorAction Stop
+            Write-Host "✓ Application is running on port 8501"
+            Write-Host "Status: $($response.StatusCode)"
             exit 0
-          fi
-          echo "Waiting for application to be ready... ($i/30)"
-          sleep 2
-        done
+          }
+          catch {
+            $retryCount++
+            Write-Host "Waiting for application to be ready... ($retryCount/$maxRetries)"
+            Start-Sleep -Seconds 2
+          }
+        }
+
+        Write-Host "✓ Deployment verification completed"
 
         echo "✓ Deployment verification completed"
         ps aux | grep streamlit || echo "Streamlit process check completed"
