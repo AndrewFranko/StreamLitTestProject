@@ -184,24 +184,23 @@ jobs:
 
         Write-Host "✓ Deployment verification completed"
 
-        echo "✓ Deployment verification completed"
-        ps aux | grep streamlit || echo "Streamlit process check completed"
-
     - name: Check application logs
       if: always()
+      shell: powershell
       run: |
-        if [ -f logs/app.log ]; then
-          echo "=== Application Logs ==="
-          tail -50 logs/app.log
-        fi
+        if (Test-Path "logs/app.log") {
+          Write-Host "=== Application Logs ==="
+          Get-Content "logs/app.log" -Tail 50
+        }
 
     - name: Send deployment notification
       if: success()
+      shell: powershell
       run: |
-        echo "✓ Deployment successful!"
-        echo "Application URL: http://localhost:8501"
-        echo "Commit: ${{ github.sha }}"
-        echo "Branch: ${{ github.ref }}"
+        Write-Host "✓ Deployment successful!"
+        Write-Host "Application URL: http://localhost:8501"
+        Write-Host "Commit: ${{ github.sha }}"
+        Write-Host "Branch: ${{ github.ref }}"
 
     - name: Handle deployment failure
       if: failure()
